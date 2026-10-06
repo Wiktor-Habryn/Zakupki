@@ -3,93 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Planer Posiłków</title>
+    <title>Planer i Zakupy</title>
     <style>
-        :root {
-            --primary: #4CAF50;
-            --bg: #f4f7f6;
-            --surface: #ffffff;
-            --text: #333;
-            --border: #e0e0e0;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        :root { --primary: #4CAF50; --bg: #f4f7f6; --surface: #ffffff; --text: #333; --border: #e0e0e0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         body { background-color: var(--bg); color: var(--text); padding-bottom: 80px; }
         
-        /* Navbar */
+        /* Top Navbar */
         .navbar { display: flex; justify-content: center; background: var(--surface); padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .user-switch { display: flex; background: #eee; border-radius: 25px; overflow: hidden; }
-        .user-switch button { flex: 1; padding: 10px 30px; border: none; background: none; font-size: 16px; font-weight: bold; color: #777; cursor: pointer; transition: 0.3s; }
+        .user-switch button { flex: 1; padding: 10px 30px; border: none; background: none; font-size: 16px; font-weight: bold; color: #777; cursor: pointer; }
         .user-switch button.active { background: var(--primary); color: white; }
 
-        /* Loader */
         .loader { text-align: center; padding: 40px; font-weight: bold; color: #888; display: none; }
+        .view-container { padding: 15px; max-width: 800px; margin: 0 auto; display: none; }
+        .view-container.active { display: block; }
 
-        /* Plan Grid */
-        .plan-container { padding: 15px; max-width: 800px; margin: 0 auto; }
+        /* Plan CSS */
         .day-card { background: var(--surface); border-radius: 12px; margin-bottom: 20px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .day-title { font-size: 18px; margin-bottom: 15px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        
         .meal-row { display: flex; align-items: center; margin-bottom: 12px; }
         .meal-label { width: 90px; font-size: 14px; font-weight: bold; color: #555; }
-        .meal-box { flex: 1; background: #f9f9f9; border: 1px dashed #ccc; padding: 12px; border-radius: 8px; font-size: 15px; min-height: 44px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
-        .meal-box:active { background: #eee; }
+        .meal-box { flex: 1; background: #f9f9f9; border: 1px dashed #ccc; padding: 12px; border-radius: 8px; font-size: 15px; min-height: 44px; display: flex; align-items: center; cursor: pointer; }
         .meal-box.filled { background: #e8f5e9; border-color: var(--primary); border-style: solid; }
 
-        /* Modal (Wybór z bazy) */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: flex-end; }
-        .modal-content { background: var(--surface); width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        /* Shopping List CSS */
+        .add-item-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .add-item-row input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+        .add-item-row button { padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; }
         
-        .modal-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .close-btn { font-size: 24px; cursor: pointer; color: #888; }
+        .shopping-item { display: flex; align-items: center; background: var(--surface); padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: 0.2s; }
+        .shopping-item.checked { opacity: 0.6; }
+        .shopping-item.checked .item-name { text-decoration: line-through; }
+        .item-checkbox { width: 24px; height: 24px; margin-right: 15px; accent-color: var(--primary); }
+        .item-name { flex: 1; font-size: 16px; font-weight: 500; }
+        .item-amount { width: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; text-align: center; }
+        
+        .clear-btn { width: 100%; padding: 15px; background: #ff5252; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface); display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-top: 1px solid var(--border); z-index: 100; }
+        .nav-item { flex: 1; padding: 15px; text-align: center; font-size: 16px; font-weight: bold; color: #888; cursor: pointer; }
+        .nav-item.active { color: var(--primary); border-top: 3px solid var(--primary); background: #f0fdf4; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: flex-end; }
+        .modal-content { background: var(--surface); width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; }
+        .modal-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .close-btn { font-size: 24px; color: #888; cursor: pointer; }
         .search-bar { padding: 15px; border-bottom: 1px solid var(--border); }
         .search-bar input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-        
         .food-list { overflow-y: auto; padding: 10px; flex: 1; }
         .food-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 16px; }
-        .food-item:active { background: #f0f0f0; }
-        .food-category { font-size: 12px; color: #888; display: block; margin-top: 4px; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
+    <!-- Top Nav (tylko w Planerze) -->
+    <nav class="navbar" id="topNav">
         <div class="user-switch">
             <button id="btn-Wiktor" class="active" onclick="switchUser('Wiktor')">Wiktor</button>
             <button id="btn-Julia" onclick="switchUser('Julia')">Julia</button>
         </div>
     </nav>
 
-    <div id="loader" class="loader">Ładowanie planu...</div>
-    <div id="plan" class="plan-container"></div>
+    <div id="loader" class="loader">Ładowanie danych...</div>
 
-    <!-- Modal do wyboru posiłku -->
+    <!-- WIDOK PLANU -->
+    <div id="plan-view" class="view-container active"></div>
+
+    <!-- WIDOK ZAKUPÓW -->
+    <div id="shopping-view" class="view-container">
+        <div class="add-item-row">
+            <input type="text" id="newItemInput" placeholder="Dodaj np. Mleko..." onkeypress="handleEnter(event)">
+            <button onclick="addShoppingItem()">Dodaj</button>
+        </div>
+        <div id="shopping-list"></div>
+        <button class="clear-btn" onclick="clearPurchased()">Usuń odhaczone</button>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+        <div id="nav-plan" class="nav-item active" onclick="switchView('plan')">📅 Planer</div>
+        <div id="nav-shop" class="nav-item" onclick="switchView('shop')">🛒 Zakupy</div>
+    </div>
+
+    <!-- Modal Wyboru Dania -->
     <div id="modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Wybierz danie</h3>
-                <span class="close-btn" onclick="closeModal()">&times;</span>
-            </div>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Szukaj w bazie..." onkeyup="filterBaza()">
-            </div>
+            <div class="modal-header"><h3>Wybierz danie</h3><span class="close-btn" onclick="closeModal()">&times;</span></div>
+            <div class="search-bar"><input type="text" id="searchInput" placeholder="Szukaj..." onkeyup="filterBaza()"></div>
             <div id="foodList" class="food-list"></div>
         </div>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbyUgUmZBrbj2dlOJEz-oSvHdC8FyKuqHxbE7QydKI6XbnLm5QnLONxAH7EnKo9Txq5sVQ/exec";
+        
         let currentUser = 'Wiktor';
         let bazaDan = [];
+        let shoppingList = [];
         let currentSelection = { dayIndex: null, mealIndex: null };
-        
         const dni = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"];
         const posilki = ["Śniadanie", "Obiad", "Kolacja", "Zachcianka"];
 
-        // Inicjalizacja aplikacji
         async function init() {
             await fetchBaza();
             await fetchPlan();
+            await fetchShoppingList();
+        }
+
+        function switchView(view) {
+            document.getElementById('plan-view').classList.toggle('active', view === 'plan');
+            document.getElementById('shopping-view').classList.toggle('active', view === 'shop');
+            document.getElementById('nav-plan').classList.toggle('active', view === 'plan');
+            document.getElementById('nav-shop').classList.toggle('active', view === 'shop');
+            document.getElementById('topNav').style.display = view === 'plan' ? 'flex' : 'none';
         }
 
         function switchUser(user) {
@@ -99,57 +128,38 @@
             fetchPlan();
         }
 
+        function showLoader(show) { document.getElementById('loader').style.display = show ? 'block' : 'none'; }
+
+        // --- PLANER LOGIKA ---
+
         async function fetchBaza() {
-            try {
-                const response = await fetch(`${API_URL}?action=getBaza`);
-                bazaDan = await response.json();
-                renderBaza(bazaDan);
-            } catch (error) {
-                console.error("Błąd pobierania bazy:", error);
-            }
+            const res = await fetch(`${API_URL}?action=getBaza`);
+            bazaDan = await res.json();
         }
 
         async function fetchPlan() {
-            const planDiv = document.getElementById('plan');
-            const loader = document.getElementById('loader');
-            planDiv.innerHTML = '';
-            loader.style.display = 'block';
-
-            try {
-                const response = await fetch(`${API_URL}?action=getPlan&user=${currentUser}`);
-                const planData = await response.json(); // Array 4x5 [meal][day]
-                loader.style.display = 'none';
-                renderPlan(planData);
-            } catch (error) {
-                loader.innerHTML = 'Błąd ładowania danych.';
-                console.error(error);
-            }
+            showLoader(true);
+            const res = await fetch(`${API_URL}?action=getPlan&user=${currentUser}`);
+            const planData = await res.json();
+            renderPlan(planData);
+            showLoader(false);
         }
 
         function renderPlan(planData) {
-            const planDiv = document.getElementById('plan');
+            const planDiv = document.getElementById('plan-view');
             planDiv.innerHTML = '';
-
             dni.forEach((dzien, dIndex) => {
                 const card = document.createElement('div');
                 card.className = 'day-card';
                 card.innerHTML = `<div class="day-title">${dzien}</div>`;
-
                 posilki.forEach((posilek, mIndex) => {
-                    const row = document.createElement('div');
-                    row.className = 'meal-row';
-                    
-                    // Odczytujemy dane (zamiana osi - arkusz ma wiersze jako posiłki, kolumny jako dni)
-                    const aktualneDanie = planData[mIndex][dIndex] || "+ Wybierz";
-                    const isFilled = aktualneDanie !== "+ Wybierz";
-
-                    row.innerHTML = `
-                        <div class="meal-label">${posilek}</div>
-                        <div class="meal-box ${isFilled ? 'filled' : ''}" onclick="openModal(${dIndex}, ${mIndex})">
-                            ${aktualneDanie}
-                        </div>
-                    `;
-                    card.appendChild(row);
+                    const aktualneDanie = planData[mIndex]?.[dIndex] || "+ Wybierz";
+                    const isFilled = aktualneDanie !== "+ Wybierz" && aktualneDanie !== "";
+                    card.innerHTML += `
+                        <div class="meal-row">
+                            <div class="meal-label">${posilek}</div>
+                            <div class="meal-box ${isFilled ? 'filled' : ''}" onclick="openModal(${dIndex}, ${mIndex})">${aktualneDanie}</div>
+                        </div>`;
                 });
                 planDiv.appendChild(card);
             });
@@ -157,69 +167,91 @@
 
         function openModal(dIndex, mIndex) {
             currentSelection = { dayIndex: dIndex, mealIndex: mIndex };
-            document.getElementById('searchInput').value = '';
-            renderBaza(bazaDan); // Reset listy
+            renderBaza(bazaDan);
             document.getElementById('modal').style.display = 'flex';
         }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        
         function renderBaza(dane) {
             const list = document.getElementById('foodList');
             list.innerHTML = '';
-            dane.forEach(danie => {
+            dane.forEach(d => {
                 const item = document.createElement('div');
                 item.className = 'food-item';
-                item.innerHTML = `
-                    <div>${danie.name}</div>
-                    <span class="food-category">${danie.category || ''}</span>
-                `;
-                item.onclick = () => selectDanie(danie.name);
+                item.innerText = d.name;
+                item.onclick = () => selectDanie(d.name);
                 list.appendChild(item);
             });
         }
 
         function filterBaza() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = bazaDan.filter(d => d.name.toLowerCase().includes(query));
-            renderBaza(filtered);
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            renderBaza(bazaDan.filter(d => d.name.toLowerCase().includes(q)));
         }
 
         async function selectDanie(danieName) {
             closeModal();
-            // Natychmiastowa aktualizacja interfejsu (optymistyczna)
-            const cards = document.querySelectorAll('.day-card');
-            const targetBox = cards[currentSelection.dayIndex].querySelectorAll('.meal-box')[currentSelection.mealIndex];
-            targetBox.innerText = danieName + " (Zapisywanie...)";
-            targetBox.classList.add('filled');
-
-            // Wysłanie do API
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'savePlan',
-                        user: currentUser,
-                        dayIndex: currentSelection.dayIndex,
-                        mealIndex: currentSelection.mealIndex,
-                        mealName: danieName
-                    })
-                });
-                targetBox.innerText = danieName;
-            } catch (error) {
-                targetBox.innerText = "Błąd zapisu!";
-                console.error(error);
-            }
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'savePlan', user: currentUser, dayIndex: currentSelection.dayIndex, mealIndex: currentSelection.mealIndex, mealName: danieName }) });
+            setTimeout(fetchPlan, 500); // Odśwież widok po chwili
         }
 
-        // Zamknięcie modala po kliknięciu w tło
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('modal')) closeModal();
+        // --- ZAKUPY LOGIKA ---
+
+        async function fetchShoppingList() {
+            const res = await fetch(`${API_URL}?action=getShoppingList`);
+            shoppingList = await res.json();
+            renderShoppingList();
         }
 
-        // Start
+        function renderShoppingList() {
+            const listDiv = document.getElementById('shopping-list');
+            listDiv.innerHTML = '';
+            shoppingList.forEach(item => {
+                const row = document.createElement('div');
+                row.className = `shopping-item ${item.status ? 'checked' : ''}`;
+                row.innerHTML = `
+                    <input type="checkbox" class="item-checkbox" ${item.status ? 'checked' : ''} onchange="toggleStatus('${item.id}', this.checked)">
+                    <div class="item-name">${item.name}</div>
+                    <input type="text" class="item-amount" value="${item.amount || ''}" placeholder="Ilość..." onchange="updateAmount('${item.id}', this.value)">
+                `;
+                listDiv.appendChild(row);
+            });
+        }
+
+        function handleEnter(e) { if(e.key === 'Enter') addShoppingItem(); }
+
+        async function addShoppingItem() {
+            const input = document.getElementById('newItemInput');
+            const name = input.value.trim();
+            if(!name) return;
+            input.value = ''; // Wyczyść pole natychmiast
+            
+            // Optymistyczny update dla płynności
+            const tempId = 'temp-' + Date.now();
+            shoppingList.unshift({ id: tempId, name: name, amount: '', status: false });
+            renderShoppingList();
+
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addShoppingItem', name: name }) });
+            fetchShoppingList(); // Pobierz prawdziwe ID
+        }
+
+        function toggleStatus(id, isChecked) {
+            const item = shoppingList.find(i => i.id === id);
+            if(item) item.status = isChecked;
+            renderShoppingList();
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateShoppingItem', id: id, field: 'status', value: isChecked }) });
+        }
+
+        function updateAmount(id, newAmount) {
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateShoppingItem', id: id, field: 'amount', value: newAmount }) });
+        }
+
+        async function clearPurchased() {
+            shoppingList = shoppingList.filter(i => !i.status);
+            renderShoppingList();
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'clearPurchased' }) });
+        }
+
         init();
     </script>
 </body>
