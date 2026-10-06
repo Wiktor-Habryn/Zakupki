@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Planer i Zakupy</title>
+    <!-- Ta linijka usuwa błąd favicon.ico 404 -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <style>
         :root { --primary: #4CAF50; --bg: #f4f7f6; --surface: #ffffff; --text: #333; --border: #e0e0e0; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         body { background-color: var(--bg); color: var(--text); padding-bottom: 80px; }
         
-        /* Top Navbar */
         .navbar { display: flex; justify-content: center; background: var(--surface); padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .user-switch { display: flex; background: #eee; border-radius: 25px; overflow: hidden; }
         .user-switch button { flex: 1; padding: 10px 30px; border: none; background: none; font-size: 16px; font-weight: bold; color: #777; cursor: pointer; }
@@ -19,7 +20,6 @@
         .view-container { padding: 15px; max-width: 800px; margin: 0 auto; display: none; }
         .view-container.active { display: block; }
 
-        /* Plan CSS */
         .day-card { background: var(--surface); border-radius: 12px; margin-bottom: 20px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .day-title { font-size: 18px; margin-bottom: 15px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
         .meal-row { display: flex; align-items: center; margin-bottom: 12px; }
@@ -27,7 +27,6 @@
         .meal-box { flex: 1; background: #f9f9f9; border: 1px dashed #ccc; padding: 12px; border-radius: 8px; font-size: 15px; min-height: 44px; display: flex; align-items: center; cursor: pointer; }
         .meal-box.filled { background: #e8f5e9; border-color: var(--primary); border-style: solid; }
 
-        /* Shopping List CSS */
         .add-item-row { display: flex; gap: 10px; margin-bottom: 20px; }
         .add-item-row input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
         .add-item-row button { padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; }
@@ -41,12 +40,10 @@
         
         .clear-btn { width: 100%; padding: 15px; background: #ff5252; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; }
 
-        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface); display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-top: 1px solid var(--border); z-index: 100; }
         .nav-item { flex: 1; padding: 15px; text-align: center; font-size: 16px; font-weight: bold; color: #888; cursor: pointer; }
         .nav-item.active { color: var(--primary); border-top: 3px solid var(--primary); background: #f0fdf4; }
 
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: flex-end; }
         .modal-content { background: var(--surface); width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; }
         .modal-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
@@ -58,21 +55,15 @@
     </style>
 </head>
 <body>
-
-    <!-- Top Nav (tylko w Planerze) -->
     <nav class="navbar" id="topNav">
         <div class="user-switch">
             <button id="btn-Wiktor" class="active" onclick="switchUser('Wiktor')">Wiktor</button>
             <button id="btn-Julia" onclick="switchUser('Julia')">Julia</button>
         </div>
     </nav>
-
     <div id="loader" class="loader">Ładowanie danych...</div>
-
-    <!-- WIDOK PLANU -->
     <div id="plan-view" class="view-container active"></div>
 
-    <!-- WIDOK ZAKUPÓW -->
     <div id="shopping-view" class="view-container">
         <div class="add-item-row">
             <input type="text" id="newItemInput" placeholder="Dodaj np. Mleko..." onkeypress="handleEnter(event)">
@@ -82,13 +73,11 @@
         <button class="clear-btn" onclick="clearPurchased()">Usuń odhaczone</button>
     </div>
 
-    <!-- BOTTOM NAV -->
     <div class="bottom-nav">
         <div id="nav-plan" class="nav-item active" onclick="switchView('plan')">📅 Planer</div>
         <div id="nav-shop" class="nav-item" onclick="switchView('shop')">🛒 Zakupy</div>
     </div>
 
-    <!-- Modal Wyboru Dania -->
     <div id="modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>Wybierz danie</h3><span class="close-btn" onclick="closeModal()">&times;</span></div>
@@ -106,6 +95,16 @@
         let currentSelection = { dayIndex: null, mealIndex: null };
         const dni = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"];
         const posilki = ["Śniadanie", "Obiad", "Kolacja", "Zachcianka"];
+
+        // NOWA FUNKCJA ZAPISU - Omija błędy CORS
+        function postData(payload) {
+            return fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+        }
 
         async function init() {
             await fetchBaza();
@@ -129,8 +128,6 @@
         }
 
         function showLoader(show) { document.getElementById('loader').style.display = show ? 'block' : 'none'; }
-
-        // --- PLANER LOGIKA ---
 
         async function fetchBaza() {
             const res = await fetch(`${API_URL}?action=getBaza`);
@@ -189,14 +186,13 @@
             renderBaza(bazaDan.filter(d => d.name.toLowerCase().includes(q)));
         }
 
-        async function selectDanie(danieName) {
+        function selectDanie(danieName) {
             closeModal();
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'savePlan', user: currentUser, dayIndex: currentSelection.dayIndex, mealIndex: currentSelection.mealIndex, mealName: danieName }) });
-            setTimeout(fetchPlan, 500); // Odśwież widok po chwili
+            postData({ action: 'savePlan', user: currentUser, dayIndex: currentSelection.dayIndex, mealIndex: currentSelection.mealIndex, mealName: danieName })
+                .then(() => setTimeout(fetchPlan, 800));
         }
 
         // --- ZAKUPY LOGIKA ---
-
         async function fetchShoppingList() {
             const res = await fetch(`${API_URL}?action=getShoppingList`);
             shoppingList = await res.json();
@@ -220,36 +216,36 @@
 
         function handleEnter(e) { if(e.key === 'Enter') addShoppingItem(); }
 
-        async function addShoppingItem() {
+        function addShoppingItem() {
             const input = document.getElementById('newItemInput');
             const name = input.value.trim();
             if(!name) return;
-            input.value = ''; // Wyczyść pole natychmiast
+            input.value = ''; 
             
-            // Optymistyczny update dla płynności
             const tempId = 'temp-' + Date.now();
             shoppingList.unshift({ id: tempId, name: name, amount: '', status: false });
             renderShoppingList();
 
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addShoppingItem', name: name }) });
-            fetchShoppingList(); // Pobierz prawdziwe ID
+            postData({ action: 'addShoppingItem', name: name })
+                .then(() => setTimeout(fetchShoppingList, 1500));
         }
 
         function toggleStatus(id, isChecked) {
-            const item = shoppingList.find(i => i.id === id);
+            const item = shoppingList.find(i => i.id == id);
             if(item) item.status = isChecked;
             renderShoppingList();
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateShoppingItem', id: id, field: 'status', value: isChecked }) });
+            postData({ action: 'updateShoppingItem', id: id, field: 'status', value: isChecked });
         }
 
         function updateAmount(id, newAmount) {
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateShoppingItem', id: id, field: 'amount', value: newAmount }) });
+            postData({ action: 'updateShoppingItem', id: id, field: 'amount', value: newAmount });
         }
 
-        async function clearPurchased() {
+        function clearPurchased() {
             shoppingList = shoppingList.filter(i => !i.status);
             renderShoppingList();
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'clearPurchased' }) });
+            postData({ action: 'clearPurchased' })
+                .then(() => setTimeout(fetchShoppingList, 1500));
         }
 
         init();
