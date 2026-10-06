@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Planer i Zakupy</title>
-    <!-- Ta linijka usuwa błąd favicon.ico 404 -->
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <style>
         :root { --primary: #4CAF50; --bg: #f4f7f6; --surface: #ffffff; --text: #333; --border: #e0e0e0; }
@@ -62,6 +61,7 @@
         </div>
     </nav>
     <div id="loader" class="loader">Ładowanie danych...</div>
+    
     <div id="plan-view" class="view-container active"></div>
 
     <div id="shopping-view" class="view-container">
@@ -95,16 +95,6 @@
         let currentSelection = { dayIndex: null, mealIndex: null };
         const dni = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"];
         const posilki = ["Śniadanie", "Obiad", "Kolacja", "Zachcianka"];
-
-        // NOWA FUNKCJA ZAPISU - Omija błędy CORS
-        function postData(payload) {
-            return fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-        }
 
         async function init() {
             await fetchBaza();
@@ -186,10 +176,11 @@
             renderBaza(bazaDan.filter(d => d.name.toLowerCase().includes(q)));
         }
 
-        function selectDanie(danieName) {
+        async function selectDanie(danieName) {
             closeModal();
-            postData({ action: 'savePlan', user: currentUser, dayIndex: currentSelection.dayIndex, mealIndex: currentSelection.mealIndex, mealName: danieName })
-                .then(() => setTimeout(fetchPlan, 800));
+            const url = `${API_URL}?action=savePlan&user=${currentUser}&dayIndex=${currentSelection.dayIndex}&mealIndex=${currentSelection.mealIndex}&mealName=${encodeURIComponent(danieName)}`;
+            await fetch(url);
+            fetchPlan();
         }
 
         // --- ZAKUPY LOGIKA ---
@@ -216,36 +207,35 @@
 
         function handleEnter(e) { if(e.key === 'Enter') addShoppingItem(); }
 
-        function addShoppingItem() {
+        async function addShoppingItem() {
             const input = document.getElementById('newItemInput');
             const name = input.value.trim();
             if(!name) return;
             input.value = ''; 
             
-            const tempId = 'temp-' + Date.now();
-            shoppingList.unshift({ id: tempId, name: name, amount: '', status: false });
-            renderShoppingList();
-
-            postData({ action: 'addShoppingItem', name: name })
-                .then(() => setTimeout(fetchShoppingList, 1500));
+            const url = `${API_URL}?action=addShoppingItem&name=${encodeURIComponent(name)}`;
+            await fetch(url);
+            fetchShoppingList();
         }
 
-        function toggleStatus(id, isChecked) {
+        async function toggleStatus(id, isChecked) {
             const item = shoppingList.find(i => i.id == id);
             if(item) item.status = isChecked;
             renderShoppingList();
-            postData({ action: 'updateShoppingItem', id: id, field: 'status', value: isChecked });
+            
+            const url = `${API_URL}?action=updateShoppingItem&id=${id}&field=status&value=${isChecked}`;
+            await fetch(url);
         }
 
-        function updateAmount(id, newAmount) {
-            postData({ action: 'updateShoppingItem', id: id, field: 'amount', value: newAmount });
+        async function updateAmount(id, newAmount) {
+            const url = `${API_URL}?action=updateShoppingItem&id=${id}&field=amount&value=${encodeURIComponent(newAmount)}`;
+            await fetch(url);
         }
 
-        function clearPurchased() {
-            shoppingList = shoppingList.filter(i => !i.status);
-            renderShoppingList();
-            postData({ action: 'clearPurchased' })
-                .then(() => setTimeout(fetchShoppingList, 1500));
+        async function clearPurchased() {
+            const url = `${API_URL}?action=clearPurchased`;
+            await fetch(url);
+            fetchShoppingList();
         }
 
         init();
