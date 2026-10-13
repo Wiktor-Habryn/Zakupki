@@ -51,7 +51,7 @@
         .btn-danger { background: var(--danger-bg); color: var(--danger); }
         .btn-success { background: #e4f8ea; color: var(--success); }
 
-        /* Shopping List */
+        /* Shopping List & Inputs */
         .shop-add { display: flex; gap: 8px; margin-bottom: 20px; }
         .input-styled { flex: 1; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); font-size: 16px; outline: none; }
         .input-styled:focus { border-color: var(--primary); }
@@ -59,11 +59,14 @@
         .shop-item { display: flex; align-items: center; background: var(--surface); padding: 14px; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); transition: 0.2s; }
         .shop-item.checked { opacity: 0.5; background: var(--bg); }
         .shop-item.checked .shop-name { text-decoration: line-through; color: var(--muted); }
-        .shop-check { width: 24px; height: 24px; margin-right: 12px; accent-color: var(--primary); cursor: pointer; }
+        .shop-check { width: 24px; height: 24px; margin-right: 12px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; }
         .shop-name { flex: 1; font-size: 16px; font-weight: 500; }
         .shop-amount { width: 90px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; text-align: center; background: var(--bg); }
 
         /* Baza Dań */
+        .baza-controls { display: flex; gap: 8px; margin-bottom: 16px; }
+        .baza-select { width: 120px; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); font-size: 15px; outline: none; }
+        
         .dish-card { background: var(--surface); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
         .dish-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .dish-name { font-size: 16px; font-weight: 600; }
@@ -97,11 +100,13 @@
         .nav-tab { flex: 1; text-align: center; padding: 12px 0; font-size: 11px; font-weight: 600; color: var(--muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-icon { font-size: 22px; }
         .nav-tab.active { color: var(--primary); }
+        
+        /* Układ modal list składników */
+        .ing-controls { display: flex; gap: 8px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
 
-    <!-- Top Nav: Przełącznik profilu -->
     <header class="top-nav" id="topNav">
         <div class="segmented-control">
             <button id="btn-user-Wiktor" class="active" onclick="switchUser('Wiktor')">Wiktor</button>
@@ -132,6 +137,14 @@
 
     <!-- WIDOK 3: BAZA DAŃ -->
     <main id="view-baza" class="container">
+        <div class="baza-controls">
+            <input type="text" id="bazaSearch" class="input-styled" placeholder="Szukaj dania..." onkeyup="updateBazaView()">
+            <select id="bazaSort" class="baza-select" onchange="updateBazaView()">
+                <option value="az">A - Z</option>
+                <option value="za">Z - A</option>
+                <option value="cat">Kategoria</option>
+            </select>
+        </div>
         <div id="baza-list-container"></div>
     </main>
     <button id="fab-add" class="fab" onclick="openDishEditor()">+</button>
@@ -149,7 +162,7 @@
         </div>
     </nav>
 
-    <!-- MODAL 1: WYBÓR POSIŁKU -->
+    <!-- MODAL 1: WYBÓR POSIŁKU DO PLANU -->
     <div id="foodModal" class="modal">
         <div class="sheet">
             <div class="sheet-header">
@@ -189,11 +202,29 @@
         </div>
     </div>
 
+    <!-- MODAL 3: WYBÓR SKŁADNIKÓW DO KOSZYKA -->
+    <div id="ingredientModal" class="modal">
+        <div class="sheet">
+            <div class="sheet-header">
+                <h3 class="sheet-title">Wybierz składniki</h3>
+                <button class="sheet-close" onclick="closeModal('ingredientModal')">&times;</button>
+            </div>
+            <div class="sheet-body">
+                <div class="ing-controls">
+                    <button class="btn-action btn-edit" onclick="toggleAllIngredients(true)">Zaznacz wszystkie</button>
+                    <button class="btn-action btn-edit" onclick="toggleAllIngredients(false)">Odznacz</button>
+                </div>
+                <div id="ingredientModalList" style="margin-bottom: 20px;"></div>
+                <button class="btn-large btn-success" onclick="confirmAddIngredients()">🛒 Dodaj do listy zakupów</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK (Modular v10) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
-            getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, updateDoc, deleteDoc, deleteField
+            getFirestore, collection, doc, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, deleteField
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -236,21 +267,51 @@
             listenToPlan();
         };
 
-        // --- BAZA DAŃ ---
+        // --- BAZA DAŃ Z SORTOWANIEM I FILTROWANIEM ---
         onSnapshot(collection(db, "dishes"), (snapshot) => {
             dishes = [];
             snapshot.forEach(d => dishes.push({ id: d.id, ...d.data() }));
-            dishes.sort((a,b) => (a.name || '').localeCompare(b.name || ''));
-            renderBaza();
+            updateBazaView();
         });
 
-        function renderBaza() {
+        window.updateBazaView = function() {
+            const query = document.getElementById('bazaSearch').value.toLowerCase();
+            const sortBy = document.getElementById('bazaSort').value;
+            
+            // Filtrowanie
+            let filtered = dishes.filter(d => (d.name || '').toLowerCase().includes(query));
+            
+            // Sortowanie
+            filtered.sort((a, b) => {
+                const nameA = (a.name || '').toLowerCase();
+                const nameB = (b.name || '').toLowerCase();
+                const catA = (a.category || '').toLowerCase();
+                const catB = (b.category || '').toLowerCase();
+
+                if (sortBy === 'az') return nameA.localeCompare(nameB);
+                if (sortBy === 'za') return nameB.localeCompare(nameA);
+                if (sortBy === 'cat') {
+                    if (catA === catB) return nameA.localeCompare(nameB);
+                    return catA.localeCompare(catB);
+                }
+                return 0;
+            });
+
+            renderBaza(filtered);
+        };
+
+        function renderBaza(listToRender) {
             const container = document.getElementById('baza-list-container');
             container.innerHTML = '';
-            dishes.forEach(d => {
+            
+            if(listToRender.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Brak wyników.</div>';
+                return;
+            }
+
+            listToRender.forEach(d => {
                 const item = document.createElement('div');
                 item.className = 'dish-card';
-                
                 const ingText = d.ingredients ? d.ingredients : 'Brak przypisanych składników';
                 
                 item.innerHTML = `
@@ -303,7 +364,6 @@
             const ing = document.getElementById('editDishIng').value.trim();
 
             if (!name) return alert('Podaj nazwę dania!');
-
             const dishData = { name: name, category: cat, ingredients: ing };
 
             if (id) {
@@ -320,15 +380,70 @@
             }
         };
 
-        window.exportSingleDish = async function(id) {
+        // --- EKSPORT SKŁADNIKÓW DO KOSZYKA (NOWY MECHANIZM) ---
+        window.exportSingleDish = function(id) {
             const d = dishes.find(x => x.id === id);
             if (!d || !d.ingredients) return alert('To danie nie ma wpisanych składników.');
             
             const ingList = d.ingredients.split(',').map(i => i.trim()).filter(i => i);
-            for (let ing of ingList) {
-                await addDoc(collection(db, "shopping"), { name: ing, amount: "", checked: false, createdAt: Date.now() });
+            if(ingList.length === 0) return alert('Brak składników do eksportu.');
+            
+            openIngredientModal(ingList);
+        };
+
+        window.exportPlanIngredients = function() {
+            const planDishes = Object.values(currentPlan).filter(d => d && d !== "");
+            if(planDishes.length === 0) return alert('Plan jest pusty.');
+            
+            let allIngs = [];
+            planDishes.forEach(dishName => {
+                const d = dishes.find(x => x.name === dishName);
+                if (d && d.ingredients) {
+                    allIngs.push(...d.ingredients.split(',').map(i => i.trim()).filter(i => i));
+                }
+            });
+            
+            if(allIngs.length === 0) return alert('Dania w planie nie mają uzupełnionych składników.');
+            
+            // Usunięcie duplikatów
+            allIngs = [...new Set(allIngs)];
+            openIngredientModal(allIngs);
+        };
+
+        window.openIngredientModal = function(ingList) {
+            const listDiv = document.getElementById('ingredientModalList');
+            listDiv.innerHTML = '';
+            
+            ingList.forEach((ing, index) => {
+                const item = document.createElement('div');
+                item.className = 'shop-item'; // Używamy stylu elementu listy zakupów
+                item.style.marginBottom = '6px';
+                item.innerHTML = `
+                    <input type="checkbox" class="shop-check ing-export-checkbox" id="exp_${index}" value="${ing}" checked>
+                    <label class="shop-name" for="exp_${index}" style="cursor:pointer;">${ing}</label>
+                `;
+                listDiv.appendChild(item);
+            });
+            
+            document.getElementById('ingredientModal').style.display = 'flex';
+        };
+
+        window.toggleAllIngredients = function(checked) {
+            const checkboxes = document.querySelectorAll('.ing-export-checkbox');
+            checkboxes.forEach(cb => cb.checked = checked);
+        };
+
+        window.confirmAddIngredients = async function() {
+            const checkboxes = document.querySelectorAll('.ing-export-checkbox:checked');
+            if(checkboxes.length === 0) return alert('Nie wybrano żadnych składników!');
+
+            for (let cb of checkboxes) {
+                await addDoc(collection(db, "shopping"), { name: cb.value, amount: "", checked: false, createdAt: Date.now() });
             }
-            alert('Dodano składniki do listy zakupów!');
+            
+            closeModal('ingredientModal');
+            alert('Dodano wybrane składniki do listy zakupów!');
+            switchTab('shop');
         };
 
         // --- PLANER POSIŁKÓW ---
@@ -389,52 +504,26 @@
             await updateDoc(doc(db, "plans", currentUser), updates);
         };
 
-        window.exportPlanIngredients = async function() {
-            const planDishes = Object.values(currentPlan).filter(d => d && d !== "");
-            if(planDishes.length === 0) return alert('Plan jest pusty.');
-            
-            let allIngs = [];
-            planDishes.forEach(dishName => {
-                const d = dishes.find(x => x.name === dishName);
-                if (d && d.ingredients) {
-                    allIngs.push(...d.ingredients.split(',').map(i => i.trim()).filter(i => i));
-                }
-            });
-            
-            if(allIngs.length === 0) return alert('Dania w planie nie mają uzupełnionych składników.');
-            
-            // Usunięcie duplikatów
-            allIngs = [...new Set(allIngs)];
-            
-            for (let ing of allIngs) {
-                await addDoc(collection(db, "shopping"), { name: ing, amount: "", checked: false, createdAt: Date.now() });
-            }
-            alert('Wysłano składniki do listy zakupów!');
-            switchTab('shop');
-        };
-
         window.openFoodModal = function(day, meal) {
             activeSelection = { day, meal };
             document.getElementById('modalSearch').value = '';
-            renderModalDishes(dishes);
+            filterModalDishes(); // Render and apply search
             document.getElementById('foodModal').style.display = 'flex';
         };
 
-        function renderModalDishes(list) {
+        window.filterModalDishes = function() {
+            const q = document.getElementById('modalSearch').value.toLowerCase();
+            const filtered = dishes.filter(d => d.name.toLowerCase().includes(q));
+            
             const c = document.getElementById('modalDishesList');
-            c.innerHTML = '<div class="modal-item" style="color: var(--danger); text-align:center;" onclick="selectDishForPlan(null)">Odznacz / Wyczyść</div>';
-            list.forEach(d => {
+            c.innerHTML = '<div class="modal-item" style="color: var(--danger); text-align:center;" onclick="selectDishForPlan(null)">Odznacz / Wyczyść pole</div>';
+            filtered.forEach(d => {
                 const el = document.createElement('div');
                 el.className = 'modal-item';
                 el.innerText = d.name;
                 el.onclick = () => selectDishForPlan(d.name);
                 c.appendChild(el);
             });
-        }
-
-        window.filterModalDishes = function() {
-            const q = document.getElementById('modalSearch').value.toLowerCase();
-            renderModalDishes(dishes.filter(d => d.name.toLowerCase().includes(q)));
         };
 
         window.selectDishForPlan = async function(dishName) {
@@ -443,7 +532,7 @@
             const ref = doc(db, "plans", currentUser);
             
             if (dishName === null) {
-                await updateDoc(ref, { [key]: deleteField() }).catch(e => setDoc(ref, {})); // Catch for empty doc
+                await updateDoc(ref, { [key]: deleteField() }).catch(e => setDoc(ref, {}));
             } else {
                 await setDoc(ref, { [key]: dishName }, { merge: true });
             }
@@ -495,7 +584,7 @@
             }
         };
 
-        // Zamykanie modali po kliknięciu w tło
+        // Modal Controls
         window.closeModal = function(id) {
             document.getElementById(id).style.display = 'none';
         }
