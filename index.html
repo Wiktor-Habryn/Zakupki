@@ -11,6 +11,17 @@
 <meta name="apple-mobile-web-app-title" content="Zakupki">
 <title>Zakupki</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛒%3C/text%3E%3C/svg%3E">
+
+<!-- Błyskawiczne ładowanie zapisanego motywu, żeby uniknąć mignięcia białego ekranu -->
+<script>
+(function() {
+  try {
+    var theme = localStorage.getItem('zakupki_theme') || 'auto';
+    document.documentElement.setAttribute('data-theme', theme);
+  } catch(e) {}
+})();
+</script>
+
 <style>
 :root {
   --primary:#007aff; --primary-bg:#e5f1ff;
@@ -22,8 +33,10 @@
   --shadow:0 2px 8px rgba(0,0,0,.05);
   --card-border:transparent;
 }
+
+/* Kiedy ustawiony jest automatyczny tryb z systemu */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --primary:#0a84ff; --primary-bg:rgba(10,132,255,.15);
     --success:#32d74b; --success-bg:rgba(50,215,75,.15);
     --danger:#ff453a; --danger-bg:rgba(255,69,58,.15);
@@ -34,9 +47,23 @@
     --card-border:#2c2c2e;
   }
 }
+
+/* Wymuszony tryb ciemny przez użytkownika */
+:root[data-theme="dark"] {
+  --primary:#0a84ff; --primary-bg:rgba(10,132,255,.15);
+  --success:#32d74b; --success-bg:rgba(50,215,75,.15);
+  --danger:#ff453a; --danger-bg:rgba(255,69,58,.15);
+  --export-color:#ff9f0a; --export-bg:rgba(255,159,10,.15);
+  --bg:#000000; --surface:#1c1c1e; --text:#ffffff; --muted:#98989d;
+  --border:#38383a; --seg-bg:#2c2c2e; --nav-bg:rgba(28,28,30,.9);
+  --shadow:none;
+  --card-border:#2c2c2e;
+}
+
 * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif; -webkit-tap-highlight-color:transparent; }
+
 html { -webkit-text-size-adjust:100%; }
-body { background:var(--bg); color:var(--text); padding-bottom:calc(90px + env(safe-area-inset-bottom)); overscroll-behavior-y:none; }
+body { background:var(--bg); color:var(--text); padding-bottom:calc(90px + env(safe-area-inset-bottom)); overscroll-behavior-y:none; transition: background-color 0.3s; }
 button { font:inherit; color:inherit; cursor:pointer; border:none; background:none; }
 button:active, .pressable:active { transform:scale(.97); }
 button, .pressable { transition:transform .12s ease, background .2s, opacity .2s; }
@@ -44,9 +71,11 @@ button, .pressable { transition:transform .12s ease, background .2s, opacity .2s
 /* Header */
 .top-nav { background:var(--bg); padding:calc(10px + env(safe-area-inset-top)) 16px 8px; position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; }
 .top-title { font-size:28px; font-weight:800; letter-spacing:-.5px; }
+.header-actions { display:flex; gap:12px; align-items:center; }
 .avatars { display:flex; gap:8px; }
 .avatar { width:36px; height:36px; border-radius:50%; background:var(--seg-bg); color:var(--muted); font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; border:2px solid transparent; }
 .avatar.active { background:var(--primary); color:#fff; border-color:var(--primary-bg); }
+.theme-btn { width:36px; height:36px; font-size:18px; display:flex; justify-content:center; align-items:center; background:var(--surface); border-radius:18px; box-shadow:var(--shadow); border:1px solid var(--card-border); }
 
 .container { display:none; padding:8px 16px 16px; max-width:600px; margin:0 auto; animation:fadeIn .3s ease; }
 .container.active { display:block; }
@@ -55,7 +84,6 @@ button, .pressable { transition:transform .12s ease, background .2s, opacity .2s
 /* Cards / planer */
 .card { background:var(--surface); border-radius:16px; margin-bottom:14px; padding:14px 16px 16px; box-shadow:var(--shadow); border:1px solid var(--card-border); transition:opacity .3s; }
 .card.today { border:2px solid var(--primary); }
-.card.past { opacity:.55; }
 .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .card-title { font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px; }
 .badge-today { font-size:11px; font-weight:700; background:var(--primary); color:#fff; padding:3px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:.5px; }
@@ -126,7 +154,7 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 .sheet-close { font-size:28px; color:var(--muted); line-height:1; }
 .sheet-body { overflow-y:auto; padding:16px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); }
 .sheet-section { padding:16px; background:var(--surface); }
-.modal-item { background:var(--surface); padding:16px; border-radius:12px; margin-bottom:8px; font-size:16px; font-weight:500; cursor:pointer; width:100%; text-align:left; display:block; }
+.modal-item { background:var(--surface); padding:16px; border-radius:12px; margin-bottom:8px; font-size:16px; font-weight:500; cursor:pointer; width:100%; text-align:left; display:block; color:var(--text); }
 .form-group { margin-bottom:16px; }
 .form-label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; margin-left:4px; }
 .form-hint { font-size:12px; color:var(--muted); margin:6px 4px 0; }
@@ -174,9 +202,13 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 
 <header class="top-nav">
   <div class="top-title" id="topTitle">Planer</div>
-  <div class="avatars" aria-label="Użytkownik">
-    <button class="avatar active" id="avatar-Wiktor" data-act="user" data-user="Wiktor" aria-label="Wiktor">W</button>
-    <button class="avatar" id="avatar-Julia" data-act="user" data-user="Julia" aria-label="Julia">J</button>
+  <div class="header-actions">
+    <!-- Przycisk zmiany motywu -->
+    <button class="theme-btn" data-act="toggle-theme" aria-label="Zmień motyw">🌓</button>
+    <div class="avatars" aria-label="Użytkownik">
+      <button class="avatar active" id="avatar-Wiktor" data-act="user" data-user="Wiktor" aria-label="Wiktor">W</button>
+      <button class="avatar" id="avatar-Julia" data-act="user" data-user="Julia" aria-label="Julia">J</button>
+    </div>
   </div>
 </header>
 
@@ -410,8 +442,7 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   $(`view-${tab}`).classList.add('active');
   $(`tab-${tab}`).classList.add('active');
-  $('topTitle').textContent = TITLES[tab];
-  $('fab-add').classList.toggle('show', tab === 'baza');
+  $('topTitle').textContent = TITLES[tab];$('fab-add').classList.toggle('show', tab === 'baza');
   window.scrollTo(0, 0);
 }
 
@@ -424,14 +455,13 @@ function switchUser(user) {
   listenToPlan();
 }
 function updateAvatars() {
-  $('avatar-Wiktor').classList.toggle('active', currentUser === 'Wiktor');
-  $('avatar-Julia').classList.toggle('active', currentUser === 'Julia');
+  $('avatar-Wiktor').classList.toggle('active', currentUser === 'Wiktor');$('avatar-Julia').classList.toggle('active', currentUser === 'Julia');
 }
 
 /* ---------- Składniki ---------- */
 function parseIng(str) {
   if (!str) return [];
-  const sep = /[\n;]/.test(str) ? /[\n;]+/ : /,/;   // stare dane (przecinki) nadal działają
+  const sep = /[\n;]/.test(str) ? /[\n;]+/ : /,/;
   return str.split(sep).map(s => s.trim()).filter(Boolean);
 }
 function dedupe(list) {
@@ -637,7 +667,6 @@ function listenToPlan() {
   }, err => { console.error(err); toast('Brak dostępu do planu'); });
 }
 
-// plan trzyma ID dania; starsze wpisy (nazwy) też działają
 function resolveDish(val) {
   if (!val) return null;
   return dishes.find(d => d.id === val) || dishes.find(d => d.name === val) || null;
@@ -649,7 +678,7 @@ function planLabel(val) {
   return /^[A-Za-z0-9]{20}$/.test(val) ? 'Usunięte danie' : val;
 }
 function todayIndex() {
-  const g = new Date().getDay();   // 0 = niedziela
+  const g = new Date().getDay();
   return g >= 1 && g <= 5 ? g - 1 : -1;
 }
 
@@ -659,7 +688,8 @@ function renderPlan() {
   const today = todayIndex();
 
   container.innerHTML = DNI.map((dzien, i) => {
-    const cls = i === today ? 'today' : (today > -1 && i < today ? 'past' : '');
+    // Usunięto klasę 'past' która dawała efekt wyszarzenia (opacity 55%)
+    const cls = i === today ? 'today' : ''; 
     const rows = POSILKI.map(posilek => {
       const val = currentPlan[`${dzien}_${posilek}`];
       const filled = !!val;
@@ -789,7 +819,7 @@ document.addEventListener('focusout', e => {
 });
 
 function addShopItem() {
-  const nameInput = $('newShopInput'), amountInput = $('newShopAmount');
+  const nameInput = $('newShopInput'), amountInput =$('newShopAmount');
   const name = nameInput.value.trim(), amount = amountInput.value.trim();
   if (!name) return;
   if (shoppingItems.some(i => !i.checked && norm(i.name) === norm(name))) {
@@ -827,6 +857,21 @@ function clearPurchased() {
 const actions = {
   tab: el => switchTab(el.dataset.tab),
   user: el => switchUser(el.dataset.user),
+  'toggle-theme': () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    let next = 'auto';
+    if (current === 'auto') next = 'dark';
+    else if (current === 'dark') next = 'light';
+    else next = 'auto';
+
+    document.documentElement.setAttribute('data-theme', next);
+    store.set('zakupki_theme', next);
+    
+    let label = 'Systemowy';
+    if (next === 'dark') label = 'Ciemny';
+    if (next === 'light') label = 'Jasny';
+    toast(`Motyw: ${label}`);
+  },
   close: el => closeModal(el.dataset.modal),
   'close-cooking': () => closeCooking(),
   'export-plan': () => exportPlanIngredients(),
@@ -876,10 +921,8 @@ document.addEventListener('change', e => {
   }
 });
 
-$('newShopInput').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });
-$('newShopAmount').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });
-$('bazaSearch').addEventListener('input', renderBaza);
-$('modalSearch').addEventListener('input', filterModalDishes);
+$('newShopInput').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });$('newShopAmount').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });
+$('bazaSearch').addEventListener('input', renderBaza);$('modalSearch').addEventListener('input', filterModalDishes);
 
 /* ---------- Start ---------- */
 updateAvatars();
