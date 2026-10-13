@@ -11,8 +11,6 @@
 <meta name="apple-mobile-web-app-title" content="Zakupki">
 <title>Zakupki</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛒%3C/text%3E%3C/svg%3E">
-
-<!-- Błyskawiczne ładowanie zapisanego motywu, żeby uniknąć mignięcia białego ekranu -->
 <script>
 (function() {
   try {
@@ -21,7 +19,6 @@
   } catch(e) {}
 })();
 </script>
-
 <style>
 :root {
   --primary:#007aff; --primary-bg:#e5f1ff;
@@ -33,8 +30,6 @@
   --shadow:0 2px 8px rgba(0,0,0,.05);
   --card-border:transparent;
 }
-
-/* Kiedy ustawiony jest automatyczny tryb z systemu */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --primary:#0a84ff; --primary-bg:rgba(10,132,255,.15);
@@ -47,8 +42,6 @@
     --card-border:#2c2c2e;
   }
 }
-
-/* Wymuszony tryb ciemny przez użytkownika */
 :root[data-theme="dark"] {
   --primary:#0a84ff; --primary-bg:rgba(10,132,255,.15);
   --success:#32d74b; --success-bg:rgba(50,215,75,.15);
@@ -59,16 +52,12 @@
   --shadow:none;
   --card-border:#2c2c2e;
 }
-
 * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif; -webkit-tap-highlight-color:transparent; }
-
 html { -webkit-text-size-adjust:100%; }
 body { background:var(--bg); color:var(--text); padding-bottom:calc(90px + env(safe-area-inset-bottom)); overscroll-behavior-y:none; transition: background-color 0.3s; }
 button { font:inherit; color:inherit; cursor:pointer; border:none; background:none; }
 button:active, .pressable:active { transform:scale(.97); }
 button, .pressable { transition:transform .12s ease, background .2s, opacity .2s; }
-
-/* Header */
 .top-nav { background:var(--bg); padding:calc(10px + env(safe-area-inset-top)) 16px 8px; position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; }
 .top-title { font-size:28px; font-weight:800; letter-spacing:-.5px; }
 .header-actions { display:flex; gap:12px; align-items:center; }
@@ -76,12 +65,9 @@ button, .pressable { transition:transform .12s ease, background .2s, opacity .2s
 .avatar { width:36px; height:36px; border-radius:50%; background:var(--seg-bg); color:var(--muted); font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; border:2px solid transparent; }
 .avatar.active { background:var(--primary); color:#fff; border-color:var(--primary-bg); }
 .theme-btn { width:36px; height:36px; font-size:18px; display:flex; justify-content:center; align-items:center; background:var(--surface); border-radius:18px; box-shadow:var(--shadow); border:1px solid var(--card-border); }
-
 .container { display:none; padding:8px 16px 16px; max-width:600px; margin:0 auto; animation:fadeIn .3s ease; }
 .container.active { display:block; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
-
-/* Cards / planer */
 .card { background:var(--surface); border-radius:16px; margin-bottom:14px; padding:14px 16px 16px; box-shadow:var(--shadow); border:1px solid var(--card-border); transition:opacity .3s; }
 .card.today { border:2px solid var(--primary); }
 .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
@@ -94,8 +80,6 @@ button, .pressable { transition:transform .12s ease, background .2s, opacity .2s
 .meal-box { flex:1; text-align:left; padding:11px 14px; border-radius:12px; font-size:15px; font-weight:600; background:var(--primary-bg); color:var(--primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .meal-box.empty { background:transparent; border:1.5px dashed var(--border); color:var(--muted); font-weight:500; padding:9px 14px; }
 .plan-actions-top { display:flex; gap:8px; margin-bottom:14px; }
-
-/* Buttons */
 .btn-large { width:100%; padding:14px; border-radius:12px; font-size:15px; font-weight:600; display:flex; justify-content:center; align-items:center; gap:8px; }
 .btn-primary { background:var(--primary); color:#fff; }
 .btn-danger { background:var(--danger-bg); color:var(--danger); }
@@ -105,13 +89,9 @@ button, .pressable { transition:transform .12s ease, background .2s, opacity .2s
 .btn-del { background:var(--danger-bg); color:var(--danger); }
 .btn-export { background:var(--export-bg); color:var(--export-color); }
 .btn-cook { background:var(--success-bg); color:var(--success); }
-
-/* Inputs */
 .input-styled { flex:1; padding:14px 16px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:16px; outline:none; min-width:0; }
 .input-styled:focus { border-color:var(--primary); }
 textarea.input-styled { resize:none; height:130px; line-height:1.4; }
-
-/* Zakupy */
 .shop-add { display:flex; gap:8px; margin-bottom:18px; }
 .section-head { display:flex; align-items:center; justify-content:space-between; font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin:4px 4px 8px; }
 .section-toggle { width:100%; text-align:left; }
@@ -127,8 +107,6 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 .empty-state .big { font-size:52px; margin-bottom:10px; }
 .empty-state .t { font-size:17px; font-weight:600; color:var(--text); margin-bottom:4px; }
 .empty-state .s { font-size:14px; }
-
-/* Baza */
 .chips { display:flex; gap:8px; overflow-x:auto; padding:2px 0 12px; scrollbar-width:none; }
 .chips::-webkit-scrollbar { display:none; }
 .chip { flex-shrink:0; padding:7px 14px; border-radius:20px; background:var(--surface); border:1px solid var(--border); font-size:14px; font-weight:600; color:var(--muted); }
@@ -141,8 +119,6 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 .dish-ingredients { font-size:13px; color:var(--muted); margin-top:10px; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer; }
 .dish-ingredients.open { -webkit-line-clamp:unset; display:block; }
 .dish-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
-
-/* Modale / bottom sheet */
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; justify-content:center; align-items:flex-end; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }
 .modal.open { display:flex; }
 .sheet { background:var(--bg); width:100%; max-width:600px; border-radius:24px 24px 0 0; display:flex; flex-direction:column; max-height:90vh; max-height:90dvh; animation:slideUp .35s cubic-bezier(.1,.9,.2,1); }
@@ -154,24 +130,18 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 .sheet-close { font-size:28px; color:var(--muted); line-height:1; }
 .sheet-body { overflow-y:auto; padding:16px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); }
 .sheet-section { padding:16px; background:var(--surface); }
-.modal-item { background:var(--surface); padding:16px; border-radius:12px; margin-bottom:8px; font-size:16px; font-weight:500; cursor:pointer; width:100%; text-align:left; display:block; color:var(--text); }
+.modal-item { background:var(--surface); padding:16px; border-radius:12px; margin-bottom:8px; font-size:16px; font-weight:500; cursor:pointer; width:100%; text-align:left; display:block; }
 .form-group { margin-bottom:16px; }
 .form-label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; margin-left:4px; }
 .form-hint { font-size:12px; color:var(--muted); margin:6px 4px 0; }
-
-/* FAB */
 .fab { position:fixed; bottom:calc(85px + env(safe-area-inset-bottom)); right:20px; width:56px; height:56px; background:var(--primary); color:#fff; border-radius:28px; display:none; justify-content:center; align-items:center; font-size:30px; box-shadow:0 4px 12px rgba(0,122,255,.4); z-index:90; }
 .fab.show { display:flex; }
-
-/* Dolna nawigacja */
 .bottom-nav { position:fixed; bottom:0; left:0; width:100%; background:var(--nav-bg); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:flex; border-top:1px solid var(--border); padding-bottom:env(safe-area-inset-bottom); z-index:100; }
 .nav-tab { flex:1; padding:9px 0 8px; font-size:11px; font-weight:600; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:3px; position:relative; }
 .nav-tab svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .nav-tab.active { color:var(--primary); }
 .nav-badge { position:absolute; top:4px; left:calc(50% + 6px); min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--danger); color:#fff; font-size:11px; font-weight:700; display:none; align-items:center; justify-content:center; }
 .nav-badge.show { display:flex; }
-
-/* Tryb gotowania */
 .fullscreen-modal { display:none; position:fixed; inset:0; background:var(--bg); z-index:2000; flex-direction:column; animation:slideUp .3s ease-out; }
 .fullscreen-modal.open { display:flex; }
 .cooking-header { padding:calc(16px + env(safe-area-inset-top)) 20px 14px; background:var(--surface); display:flex; justify-content:space-between; align-items:center; gap:12px; }
@@ -184,17 +154,12 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 .cook-check { width:32px; height:32px; margin-right:16px; accent-color:var(--success); pointer-events:none; flex-shrink:0; }
 .cook-name { flex:1; overflow-wrap:anywhere; }
 .cook-done { background:var(--success-bg); color:var(--success); border-radius:16px; padding:22px; text-align:center; font-size:22px; font-weight:800; margin-bottom:16px; animation:fadeIn .4s ease; }
-
-/* Toast */
 #toast { position:fixed; left:50%; bottom:calc(90px + env(safe-area-inset-bottom)); transform:translate(-50%,20px); background:rgba(40,40,42,.96); color:#fff; padding:12px 18px; border-radius:24px; font-size:14px; font-weight:600; z-index:3000; display:flex; align-items:center; gap:14px; opacity:0; pointer-events:none; transition:.25s; max-width:92vw; }
 #toast.show { opacity:1; transform:translate(-50%,0); pointer-events:auto; }
 #toast button { color:#64b5ff; font-weight:700; }
-
-/* Skeleton */
 .skeleton { background:linear-gradient(90deg,var(--seg-bg) 25%,var(--border) 50%,var(--seg-bg) 75%); background-size:200% 100%; animation:shimmer 1.3s infinite; border-radius:16px; height:120px; margin-bottom:14px; }
 .skeleton.sm { height:52px; border-radius:12px; margin-bottom:8px; }
 @keyframes shimmer { to { background-position:-200% 0; } }
-
 @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
 </style>
 </head>
@@ -203,7 +168,6 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 <header class="top-nav">
   <div class="top-title" id="topTitle">Planer</div>
   <div class="header-actions">
-    <!-- Przycisk zmiany motywu -->
     <button class="theme-btn" data-act="toggle-theme" aria-label="Zmień motyw">🌓</button>
     <div class="avatars" aria-label="Użytkownik">
       <button class="avatar active" id="avatar-Wiktor" data-act="user" data-user="Wiktor" aria-label="Wiktor">W</button>
@@ -233,6 +197,10 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 
 <!-- BAZA -->
 <main id="view-baza" class="container">
+  <!-- Specjalny przycisk do generowania składników (zniknie jeśli wszystko wygeneruje) -->
+  <button id="btn-auto-ing" class="btn-large" style="background:#ff9500; color:white; margin-bottom: 16px;" data-act="auto-ingredients">
+    🤖 Wygeneruj brakujące składniki
+  </button>
   <input type="search" id="bazaSearch" class="input-styled" style="width:100%;margin-bottom:12px;" placeholder="Szukaj dania…" autocomplete="off">
   <div class="chips" id="catChips"></div>
   <div id="baza-list-container"></div>
@@ -350,12 +318,76 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 let db;
 try {
-  // Tryb offline: dane z cache, zapisy synchronizują się po powrocie sieci
   db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
 } catch (e) {
   console.warn('Cache offline niedostępny:', e);
   db = initializeFirestore(app, {});
 }
+
+/* ---------- SŁOWNIK AUTOMATYCZNYCH SKŁADNIKÓW ---------- */
+const autoIngredients = {
+  "Spaghetti": "Makaron spaghetti\nMięso mielone\nPassata pomidorowa\nCebula\nCzosnek\nParmezan/Grana Padano",
+  "Kotlet schabowy": "Schab w plastrach\nJajka\nBułka tarta\nZiemniaki\nOlej do smażenia\nMizeria/Surówka",
+  "Zupa ogórkowa": "Ogórki kiszone\nZiemniaki\nMarchewka\nPietruszka\nŚmietana 18%\nBulion/Mięso na wywar",
+  "Pizza": "Mąka do pizzy\nDrożdże\nSos pomidorowy\nSer mozzarella\nSzynka\nPieczarki",
+  "Makaron ryżowy z kurczakiem": "Makaron ryżowy\nPierś z kurczaka\nWarzywa na patelnię\nSos sojowy\nOlej sezamowy",
+  "Makaron z pieczarkami i kurczakiem": "Makaron\nPierś z kurczaka\nPieczarki\nŚmietana 30%\nCebula",
+  "Zupa pomidorowa": "Passata pomidorowa\nBulion\nMakaron lub ryż\nŚmietana 18%",
+  "Rosół": "Mięso z kurczaka/wołowe\nMarchewka\nPietruszka\nSeler\nPor\nMakaron nitki",
+  "Zupa pieczarkowa": "Pieczarki\nZiemniaki\nMarchewka\nBulion\nŚmietana 18%",
+  "Grzanki z serem i szynką": "Chleb tostowy\nSer żółty\nSzynka\nMasło",
+  "Zapiekanki": "Bagietka\nPieczarki\nSer żółty\nKetchup",
+  "Burgery": "Bułki do burgerów\nMięso wołowe mielone\nSer cheddar\nPomidor\nSałata\nOgórek konserwowy\nSos do burgerów",
+  "Klopsiki z sosem pomidorowym": "Mięso mielone\nJajko\nBułka tarta\nPassata pomidorowa\nMakaron",
+  "Frytki z batatów": "Bataty\nOliwa z oliwek\nSól\nPrzyprawy",
+  "Frytki": "Ziemniaki lub frytki mrożone\nOlej",
+  "Hot-Dog": "Bułki do hot-dogów\nParówki\nKetchup\nMusztarda\nPrażona cebulka",
+  "Barszcz czerwony": "Buraki\nWłoszczyzna\nCzosnek\nMajeranek\nUszka/Krokiety",
+  "Barszcz biały": "Zakwas na barszcz biały\nBiała kiełbasa\nJajka\nZiemniaki\nŚmietana",
+  "Żurek": "Zakwas na żurek\nKiełbasa\nJajka\nZiemniaki\nMajeranek",
+  "Zalewajka": "Ziemniaki\nBoczek/Kiełbasa\nCzosnek\nCebula\nZakwas",
+  "Tiramisu": "Biszkopty podłużne\nSerek mascarpone\nŚmietanka 30%\nKawa\nKakao",
+  "Kotlet mielone": "Mięso mielone\nJajko\nCebula\nBułka\nZiemniaki",
+  "Zupa koperkowa": "Świeży koperek\nZiemniaki\nMarchewka\nBulion\nŚmietana",
+  "Sos mięsny": "Mięso gulaszowe\nCebula\nCzosnek\nBulion\nMąka",
+  "Karczek z serem i cebulą": "Karkówka w plastrach\nSer żółty\nCebula\nOlej",
+  "Karczek BBQ": "Karkówka w plastrach\nSos BBQ\nOlej",
+  "Udka z kurczaka": "Udka z kurczaka\nPrzyprawa do kurczaka\nZiemniaki",
+  "Pity z kurczakiem": "Chlebki pita\nPierś z kurczaka\nSałata\nPomidor\nSos czosnkowy",
+  "Ryba smażona": "Filety rybne\nJajko\nBułka tarta\nOlej\nCytryna",
+  "Łosoś pieczony": "Filet z łososia\nCytryna\nKoperek\nZiemniaki lub ryż",
+  "Zupa gulaszowa": "Mięso wołowe/wieprzowe\nZiemniaki\nPapryka czerwona\nCebula\nPassata pomidorowa",
+  "Leczo": "Kiełbasa\nPapryka\nCukinia\nCebula\nPomidory z puszki",
+  "Zupa meksykańska": "Mięso mielone\nFasola czerwona\nKukurydza\nPomidory z puszki\nPapryka",
+  "Kurczak słodko-kwasny": "Pierś z kurczaka\nSos słodko-kwaśny\nRyż\nPapryka",
+  "Kurczak w słodkim sosie sojowym": "Pierś z kurczaka\nSos sojowy\nMiód\nCzosnek\nRyż",
+  "Zupa szczawiowa": "Szczaw\nZiemniaki\nJajka\nBulion\nŚmietana",
+  "Zapiekanka makaronowa": "Makaron\nMięso mielone lub kurczak\nSer żółty\nŚmietana/Sos pomidorowy",
+  "Pancake": "Mąka\nMleko\nJajka\nProszek do pieczenia\nSyrop klonowy",
+  "Chleb bananowy": "Dojrzałe banany\nMąka\nJajka\nMasło\nCukier",
+  "Placki ziemniaczane": "Ziemniaki\nJajko\nMąka\nCebula\nOlej",
+  "Jajecznica": "Jajka\nMasło\nChleb",
+  "Szakszuka": "Jajka\nPomidory z puszki\nCebula\nCzosnek\nChleb",
+  "Kluski śląskie": "Ziemniaki\nMąka ziemniaczana\nJajko",
+  "Kopytka": "Ziemniaki\nMąka pszenna\nJajko",
+  "Pierogi": "Mąka\nWoda\nFarsz (Ser/Ziemniaki/Mięso)",
+  "Bigos": "Kapusta kiszona\nKapusta biała\nKiełbasa\nMięso z łopatki\nGrzyby",
+  "Kotlet de vollaille": "Pierś z kurczaka\nMasło\nJajka\nBułka tarta\nOlej",
+  "Krupnik": "Kasza jęczmienna\nZiemniaki\nMarchewka\nBulion",
+  "Lasagne": "Makaron lasagne\nMięso mielone\nPassata pomidorowa\nMleko (na beszamel)\nSer żółty/mozzarella",
+  "Makaron Udon": "Makaron udon\nSos sojowy\nOlej sezamowy\nWarzywa azjatyckie",
+  "Wrapy": "Tortille\nPierś z kurczaka\nSałata\nPomidor\nSos",
+  "Krewetki": "Krewetki\nMasło\nCzosnek\nPietruszka\nBiałe wino/Cytryna",
+  "Tarta z owocami": "Ciasto kruche\nOwoce\nKrem mascarpone/śmietanka",
+  "Gofry": "Mąka\nMleko\nJajka\nOlej\nProszek do pieczenia\nCukier",
+  "Naleśniki": "Mąka\nMleko\nJajka\nWoda gazowana",
+  "Zupa kalafiorowa": "Kalafior\nZiemniaki\nMarchewka\nBulion\nŚmietana",
+  "Wątróbka": "Wątróbka drobiowa\nCebula\nJabłko\nMąka\nOlej",
+  "Kebab domowy": "Mięso z kurczaka\nPrzyprawa do kebaba\nKapusta/Sałata\nSos czosnkowy\nFrytki/Bułka",
+  "Ryż smażony po chińsku": "Ryż\nJajko\nGroszek\nMarchewka\nSos sojowy",
+  "Omlety": "Jajka\nMasło\nSzynka/Ser/Warzywa",
+  "Owoce pod kruszonką": "Mrożone/świeże owoce\nMąka\nMasło\nCukier"
+};
 
 /* ---------- Pomocnicze ---------- */
 const $ = id => document.getElementById(id);
@@ -371,7 +403,6 @@ const store = {
 };
 const vibrate = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch {} };
 
-// Zapis bez blokowania UI (offline `await` nigdy by się nie rozwiązał)
 function safe(promise) {
   return Promise.resolve(promise).catch(err => { console.error(err); toast('Błąd zapisu – sprawdź połączenie'); });
 }
@@ -403,7 +434,6 @@ function toast(msg, action) {
 function openModal(id) { $(id).classList.add('open'); }
 function closeModal(id) { $(id).classList.remove('open'); }
 
-// zamykanie po kliknięciu w tło (pointerdown, żeby przeciągnięcie zaznaczenia nie zamykało)
 document.querySelectorAll('.modal').forEach(m => {
   m.addEventListener('pointerdown', e => { if (e.target === m) closeModal(m.id); });
 });
@@ -414,7 +444,6 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// przeciągnięcie nagłówka w dół zamyka sheet
 document.querySelectorAll('.sheet').forEach(sheet => {
   const header = sheet.querySelector('.sheet-header');
   const modal = sheet.parentElement;
@@ -490,7 +519,6 @@ function renderBaza() {
   const container = $('baza-list-container');
   if (!loaded.dishes) { container.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>'; return; }
 
-  // chipsy kategorii
   const cats = [...new Set(dishes.map(d => d.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pl'));
   if (activeCat && !cats.includes(activeCat)) activeCat = '';
   $('catChips').innerHTML =
@@ -499,6 +527,13 @@ function renderBaza() {
 
   const q = norm($('bazaSearch').value);
   const list = dishes.filter(d => norm(d.name).includes(q) && (!activeCat || d.category === activeCat));
+
+  // Ukrywamy przycisk automatycznego generowania, jeśli wszystkie dania mają składniki (lub przynajmniej te znane ze słownika)
+  let needsUpdate = false;
+  dishes.forEach(d => {
+    if ((!d.ingredients || d.ingredients.trim() === '') && autoIngredients[d.name]) needsUpdate = true;
+  });
+  $('btn-auto-ing').style.display = needsUpdate ? 'block' : 'none';
 
   if (dishes.length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="big">🍲</div><div class="t">Baza dań jest pusta</div><div class="s">Dodaj pierwsze danie przyciskiem +</div></div>`;
@@ -688,8 +723,7 @@ function renderPlan() {
   const today = todayIndex();
 
   container.innerHTML = DNI.map((dzien, i) => {
-    // Usunięto klasę 'past' która dawała efekt wyszarzenia (opacity 55%)
-    const cls = i === today ? 'today' : ''; 
+    const cls = i === today ? 'today' : '';
     const rows = POSILKI.map(posilek => {
       const val = currentPlan[`${dzien}_${posilek}`];
       const filled = !!val;
@@ -788,7 +822,6 @@ function renderShopping() {
   badge.textContent = todo.length;
   badge.classList.toggle('show', todo.length > 0);
 
-  // nie przerysowuj, gdy ktoś właśnie wpisuje ilość
   if (document.activeElement && document.activeElement.classList.contains('shop-amount')) { pendingShopRender = true; return; }
   pendingShopRender = false;
 
@@ -871,6 +904,24 @@ const actions = {
     if (next === 'dark') label = 'Ciemny';
     if (next === 'light') label = 'Jasny';
     toast(`Motyw: ${label}`);
+  },
+  'auto-ingredients': async () => {
+    let updated = 0;
+    const batch = writeBatch(db);
+    dishes.forEach(d => {
+      if ((!d.ingredients || d.ingredients.trim() === '') && autoIngredients[d.name]) {
+        batch.update(doc(db, "dishes", d.id), { ingredients: autoIngredients[d.name] });
+        updated++;
+      }
+    });
+    if (updated > 0) {
+      await safe(batch.commit());
+      toast(`Uzupełniono składniki dla ${updated} dań!`);
+      $('btn-auto-ing').style.display = 'none';
+    } else {
+      toast('Wszystkie dania mają już składniki.');
+      $('btn-auto-ing').style.display = 'none';
+    }
   },
   close: el => closeModal(el.dataset.modal),
   'close-cooking': () => closeCooking(),
