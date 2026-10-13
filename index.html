@@ -1,600 +1,892 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Zakupki</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <style>
-        /* Styl Native App (iOS/Material 3 blend) */
-        :root {
-            --primary: #007aff;
-            --primary-bg: #e5f1ff;
-            --success: #34c759;
-            --danger: #ff3b30;
-            --danger-bg: #ffeceb;
-            --bg: #f2f2f7;
-            --surface: #ffffff;
-            --text: #000000;
-            --muted: #8e8e93;
-            --border: #e5e5ea;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg); color: var(--text); padding-bottom: calc(90px + env(safe-area-inset-bottom)); overscroll-behavior-y: none; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Zakupki">
+<title>Zakupki</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛒%3C/text%3E%3C/svg%3E">
+<style>
+:root {
+  --primary:#007aff; --primary-bg:#e5f1ff;
+  --success:#34c759; --success-bg:#e4f8ea;
+  --danger:#ff3b30; --danger-bg:#ffeceb;
+  --export-color:#ff9500; --export-bg:#fff5e5;
+  --bg:#f2f2f7; --surface:#ffffff; --text:#000000; --muted:#8e8e93;
+  --border:#e5e5ea; --seg-bg:#e3e3e8; --nav-bg:rgba(255,255,255,.9);
+  --shadow:0 2px 8px rgba(0,0,0,.05);
+  --card-border:transparent;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary:#0a84ff; --primary-bg:rgba(10,132,255,.15);
+    --success:#32d74b; --success-bg:rgba(50,215,75,.15);
+    --danger:#ff453a; --danger-bg:rgba(255,69,58,.15);
+    --export-color:#ff9f0a; --export-bg:rgba(255,159,10,.15);
+    --bg:#000000; --surface:#1c1c1e; --text:#ffffff; --muted:#98989d;
+    --border:#38383a; --seg-bg:#2c2c2e; --nav-bg:rgba(28,28,30,.9);
+    --shadow:none;
+    --card-border:#2c2c2e;
+  }
+}
+* { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif; -webkit-tap-highlight-color:transparent; }
+html { -webkit-text-size-adjust:100%; }
+body { background:var(--bg); color:var(--text); padding-bottom:calc(90px + env(safe-area-inset-bottom)); overscroll-behavior-y:none; }
+button { font:inherit; color:inherit; cursor:pointer; border:none; background:none; }
+button:active, .pressable:active { transform:scale(.97); }
+button, .pressable { transition:transform .12s ease, background .2s, opacity .2s; }
 
-        /* Top Nav - Segmented Control */
-        .top-nav { background: var(--surface); padding: calc(10px + env(safe-area-inset-top)) 16px 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
-        .segmented-control { display: flex; background: #e3e3e8; border-radius: 9px; padding: 2px; }
-        .segmented-control button { flex: 1; border: none; background: transparent; padding: 6px 0; font-size: 14px; font-weight: 600; border-radius: 7px; color: var(--text); cursor: pointer; transition: 0.2s; }
-        .segmented-control button.active { background: var(--surface); box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); }
+/* Header */
+.top-nav { background:var(--bg); padding:calc(10px + env(safe-area-inset-top)) 16px 8px; position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; }
+.top-title { font-size:28px; font-weight:800; letter-spacing:-.5px; }
+.avatars { display:flex; gap:8px; }
+.avatar { width:36px; height:36px; border-radius:50%; background:var(--seg-bg); color:var(--muted); font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; border:2px solid transparent; }
+.avatar.active { background:var(--primary); color:#fff; border-color:var(--primary-bg); }
 
-        .container { display: none; padding: 16px; max-width: 600px; margin: 0 auto; animation: fadeIn 0.3s ease; }
-        .container.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.container { display:none; padding:8px 16px 16px; max-width:600px; margin:0 auto; animation:fadeIn .3s ease; }
+.container.active { display:block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
 
-        /* Cards */
-        .card { background: var(--surface); border-radius: 16px; margin-bottom: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .card-title { font-size: 18px; font-weight: 700; color: var(--primary); }
-        
-        /* Planer Elements */
-        .plan-actions-top { display: flex; gap: 8px; margin-bottom: 16px; }
-        .meal-row { display: flex; align-items: center; margin-bottom: 12px; }
-        .meal-row:last-child { margin-bottom: 0; }
-        .meal-label { width: 90px; font-size: 14px; font-weight: 600; color: var(--muted); }
-        .meal-box { flex: 1; background: var(--bg); padding: 12px 16px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; color: var(--muted); }
-        .meal-box.filled { background: var(--primary-bg); color: var(--primary); font-weight: 600; }
-        
-        /* Buttons */
-        .btn-icon { background: var(--bg); border: none; width: 32px; height: 32px; border-radius: 16px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 14px; color: var(--muted); }
-        .btn-large { width: 100%; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-danger { background: var(--danger-bg); color: var(--danger); }
-        .btn-success { background: #e4f8ea; color: var(--success); }
+/* Cards / planer */
+.card { background:var(--surface); border-radius:16px; margin-bottom:14px; padding:14px 16px 16px; box-shadow:var(--shadow); border:1px solid var(--card-border); transition:opacity .3s; }
+.card.today { border:2px solid var(--primary); }
+.card.past { opacity:.55; }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.card-title { font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px; }
+.badge-today { font-size:11px; font-weight:700; background:var(--primary); color:#fff; padding:3px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:.5px; }
+.btn-icon { background:var(--bg); width:32px; height:32px; border-radius:16px; display:flex; justify-content:center; align-items:center; font-size:14px; }
+.meal-row { display:flex; align-items:center; margin-bottom:8px; }
+.meal-row:last-child { margin-bottom:0; }
+.meal-label { width:92px; font-size:13px; font-weight:600; color:var(--muted); flex-shrink:0; }
+.meal-box { flex:1; text-align:left; padding:11px 14px; border-radius:12px; font-size:15px; font-weight:600; background:var(--primary-bg); color:var(--primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.meal-box.empty { background:transparent; border:1.5px dashed var(--border); color:var(--muted); font-weight:500; padding:9px 14px; }
+.plan-actions-top { display:flex; gap:8px; margin-bottom:14px; }
 
-        /* Shopping List & Inputs */
-        .shop-add { display: flex; gap: 8px; margin-bottom: 20px; }
-        .input-styled { flex: 1; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); font-size: 16px; outline: none; }
-        .input-styled:focus { border-color: var(--primary); }
-        
-        .shop-item { display: flex; align-items: center; background: var(--surface); padding: 14px; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); transition: 0.2s; }
-        .shop-item.checked { opacity: 0.5; background: var(--bg); }
-        .shop-item.checked .shop-name { text-decoration: line-through; color: var(--muted); }
-        .shop-check { width: 24px; height: 24px; margin-right: 12px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; }
-        .shop-name { flex: 1; font-size: 16px; font-weight: 500; }
-        .shop-amount { width: 90px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; text-align: center; background: var(--bg); }
+/* Buttons */
+.btn-large { width:100%; padding:14px; border-radius:12px; font-size:15px; font-weight:600; display:flex; justify-content:center; align-items:center; gap:8px; }
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-danger { background:var(--danger-bg); color:var(--danger); }
+.btn-success { background:var(--success-bg); color:var(--success); }
+.btn-action { flex:1 1 45%; padding:10px; border-radius:8px; font-size:14px; font-weight:600; display:flex; justify-content:center; align-items:center; gap:6px; }
+.btn-edit { background:var(--bg); }
+.btn-del { background:var(--danger-bg); color:var(--danger); }
+.btn-export { background:var(--export-bg); color:var(--export-color); }
+.btn-cook { background:var(--success-bg); color:var(--success); }
 
-        /* Baza Dań */
-        .baza-controls { display: flex; gap: 8px; margin-bottom: 16px; }
-        .baza-select { width: 120px; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); font-size: 15px; outline: none; }
-        
-        .dish-card { background: var(--surface); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-        .dish-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .dish-name { font-size: 16px; font-weight: 600; }
-        .dish-cat { font-size: 12px; color: var(--primary); background: var(--primary-bg); padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 4px; }
-        .dish-ingredients { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
-        .dish-actions { display: flex; gap: 8px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
-        .btn-action { flex: 1; padding: 10px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; }
-        .btn-edit { background: var(--bg); color: var(--text); }
-        .btn-del { background: var(--danger-bg); color: var(--danger); }
-        .btn-export { background: #fff5e5; color: #ff9500; flex: 2; }
+/* Inputs */
+.input-styled { flex:1; padding:14px 16px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:16px; outline:none; min-width:0; }
+.input-styled:focus { border-color:var(--primary); }
+textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 
-        /* Bottom Sheet Modal */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; justify-content: center; align-items: flex-end; backdrop-filter: blur(4px); }
-        .sheet { background: var(--bg); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; max-height: 90vh; animation: slideUp 0.35s cubic-bezier(0.1, 0.9, 0.2, 1); }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .sheet-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: var(--surface); border-radius: 24px 24px 0 0; }
-        .sheet-title { font-size: 18px; font-weight: 700; }
-        .sheet-close { font-size: 28px; color: var(--muted); background: none; border: none; cursor: pointer; line-height: 1; }
-        .sheet-body { overflow-y: auto; padding: 16px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
-        
-        .modal-item { background: var(--surface); padding: 16px; border-radius: 12px; margin-bottom: 8px; font-size: 16px; font-weight: 500; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
-        .form-group { margin-bottom: 16px; }
-        .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; margin-left: 4px; }
-        textarea.input-styled { resize: none; height: 80px; }
+/* Zakupy */
+.shop-add { display:flex; gap:8px; margin-bottom:18px; }
+.section-head { display:flex; align-items:center; justify-content:space-between; font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin:4px 4px 8px; }
+.section-toggle { width:100%; text-align:left; }
+.shop-item { display:flex; align-items:center; gap:10px; background:var(--surface); padding:12px 12px 12px 14px; border-radius:12px; margin-bottom:8px; box-shadow:var(--shadow); border:1px solid var(--card-border); animation:fadeIn .25s ease; }
+.shop-item.checked { background:transparent; box-shadow:none; border:1px solid var(--border); }
+.shop-item.checked .shop-name { text-decoration:line-through; color:var(--muted); }
+.shop-check { width:24px; height:24px; accent-color:var(--primary); flex-shrink:0; }
+.shop-name { flex:1; font-size:16px; font-weight:500; min-width:0; overflow-wrap:anywhere; }
+.shop-amount { width:70px; padding:6px 8px; border:none; border-radius:20px; font-size:13px; color:var(--muted); text-align:center; background:var(--bg); outline:none; }
+.shop-amount:focus { background:var(--primary-bg); color:var(--primary); }
+.shop-del { width:28px; height:28px; font-size:20px; color:var(--muted); border-radius:14px; line-height:1; }
+.empty-state { text-align:center; padding:48px 20px; color:var(--muted); }
+.empty-state .big { font-size:52px; margin-bottom:10px; }
+.empty-state .t { font-size:17px; font-weight:600; color:var(--text); margin-bottom:4px; }
+.empty-state .s { font-size:14px; }
 
-        /* Floating Action Button */
-        .fab { position: fixed; bottom: calc(85px + env(safe-area-inset-bottom)); right: 20px; width: 56px; height: 56px; background: var(--primary); color: white; border-radius: 28px; display: flex; justify-content: center; align-items: center; font-size: 28px; box-shadow: 0 4px 12px rgba(0,122,255,0.4); border: none; cursor: pointer; z-index: 90; display: none; }
+/* Baza */
+.chips { display:flex; gap:8px; overflow-x:auto; padding:2px 0 12px; scrollbar-width:none; }
+.chips::-webkit-scrollbar { display:none; }
+.chip { flex-shrink:0; padding:7px 14px; border-radius:20px; background:var(--surface); border:1px solid var(--border); font-size:14px; font-weight:600; color:var(--muted); }
+.chip.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+.dish-card { background:var(--surface); border-radius:16px; padding:16px; margin-bottom:12px; box-shadow:var(--shadow); border:1px solid var(--card-border); }
+.dish-name { font-size:17px; font-weight:600; }
+.dish-meta { display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap; }
+.dish-cat { font-size:12px; color:var(--primary); background:var(--primary-bg); padding:3px 8px; border-radius:6px; }
+.dish-count { font-size:12px; color:var(--muted); }
+.dish-ingredients { font-size:13px; color:var(--muted); margin-top:10px; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer; }
+.dish-ingredients.open { -webkit-line-clamp:unset; display:block; }
+.dish-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
 
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); display: flex; border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); z-index: 100; }
-        .nav-tab { flex: 1; text-align: center; padding: 12px 0; font-size: 11px; font-weight: 600; color: var(--muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .nav-icon { font-size: 22px; }
-        .nav-tab.active { color: var(--primary); }
-        
-        /* Układ modal list składników */
-        .ing-controls { display: flex; gap: 8px; margin-bottom: 12px; }
-    </style>
+/* Modale / bottom sheet */
+.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; justify-content:center; align-items:flex-end; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }
+.modal.open { display:flex; }
+.sheet { background:var(--bg); width:100%; max-width:600px; border-radius:24px 24px 0 0; display:flex; flex-direction:column; max-height:90vh; max-height:90dvh; animation:slideUp .35s cubic-bezier(.1,.9,.2,1); }
+@keyframes slideUp { from { transform:translateY(100%); } to { transform:none; } }
+.sheet-header { padding:8px 20px 14px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); background:var(--surface); border-radius:24px 24px 0 0; touch-action:none; }
+.sheet-handle { width:100%; display:flex; justify-content:center; padding:4px 0 10px; }
+.sheet-handle::before { content:""; width:38px; height:5px; border-radius:3px; background:var(--border); }
+.sheet-title { font-size:18px; font-weight:700; }
+.sheet-close { font-size:28px; color:var(--muted); line-height:1; }
+.sheet-body { overflow-y:auto; padding:16px; padding-bottom:calc(20px + env(safe-area-inset-bottom)); }
+.sheet-section { padding:16px; background:var(--surface); }
+.modal-item { background:var(--surface); padding:16px; border-radius:12px; margin-bottom:8px; font-size:16px; font-weight:500; cursor:pointer; width:100%; text-align:left; display:block; }
+.form-group { margin-bottom:16px; }
+.form-label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; margin-left:4px; }
+.form-hint { font-size:12px; color:var(--muted); margin:6px 4px 0; }
+
+/* FAB */
+.fab { position:fixed; bottom:calc(85px + env(safe-area-inset-bottom)); right:20px; width:56px; height:56px; background:var(--primary); color:#fff; border-radius:28px; display:none; justify-content:center; align-items:center; font-size:30px; box-shadow:0 4px 12px rgba(0,122,255,.4); z-index:90; }
+.fab.show { display:flex; }
+
+/* Dolna nawigacja */
+.bottom-nav { position:fixed; bottom:0; left:0; width:100%; background:var(--nav-bg); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:flex; border-top:1px solid var(--border); padding-bottom:env(safe-area-inset-bottom); z-index:100; }
+.nav-tab { flex:1; padding:9px 0 8px; font-size:11px; font-weight:600; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:3px; position:relative; }
+.nav-tab svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.nav-tab.active { color:var(--primary); }
+.nav-badge { position:absolute; top:4px; left:calc(50% + 6px); min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--danger); color:#fff; font-size:11px; font-weight:700; display:none; align-items:center; justify-content:center; }
+.nav-badge.show { display:flex; }
+
+/* Tryb gotowania */
+.fullscreen-modal { display:none; position:fixed; inset:0; background:var(--bg); z-index:2000; flex-direction:column; animation:slideUp .3s ease-out; }
+.fullscreen-modal.open { display:flex; }
+.cooking-header { padding:calc(16px + env(safe-area-inset-top)) 20px 14px; background:var(--surface); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.cooking-progress { height:4px; background:var(--border); }
+.cooking-progress > div { height:100%; width:0; background:var(--success); transition:width .3s ease; }
+.cooking-body { flex:1; overflow-y:auto; padding:20px; padding-bottom:calc(60px + env(safe-area-inset-bottom)); }
+.cooking-item { display:flex; align-items:center; padding:20px; background:var(--surface); border-radius:16px; margin-bottom:12px; font-size:20px; font-weight:600; box-shadow:var(--shadow); border:1px solid var(--card-border); cursor:pointer; transition:.3s; }
+.cooking-item.done { opacity:.35; background:transparent; box-shadow:none; border:1px solid var(--border); }
+.cooking-item.done .cook-name { text-decoration:line-through; }
+.cook-check { width:32px; height:32px; margin-right:16px; accent-color:var(--success); pointer-events:none; flex-shrink:0; }
+.cook-name { flex:1; overflow-wrap:anywhere; }
+.cook-done { background:var(--success-bg); color:var(--success); border-radius:16px; padding:22px; text-align:center; font-size:22px; font-weight:800; margin-bottom:16px; animation:fadeIn .4s ease; }
+
+/* Toast */
+#toast { position:fixed; left:50%; bottom:calc(90px + env(safe-area-inset-bottom)); transform:translate(-50%,20px); background:rgba(40,40,42,.96); color:#fff; padding:12px 18px; border-radius:24px; font-size:14px; font-weight:600; z-index:3000; display:flex; align-items:center; gap:14px; opacity:0; pointer-events:none; transition:.25s; max-width:92vw; }
+#toast.show { opacity:1; transform:translate(-50%,0); pointer-events:auto; }
+#toast button { color:#64b5ff; font-weight:700; }
+
+/* Skeleton */
+.skeleton { background:linear-gradient(90deg,var(--seg-bg) 25%,var(--border) 50%,var(--seg-bg) 75%); background-size:200% 100%; animation:shimmer 1.3s infinite; border-radius:16px; height:120px; margin-bottom:14px; }
+.skeleton.sm { height:52px; border-radius:12px; margin-bottom:8px; }
+@keyframes shimmer { to { background-position:-200% 0; } }
+
+@media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+</style>
 </head>
 <body>
 
-    <header class="top-nav" id="topNav">
-        <div class="segmented-control">
-            <button id="btn-user-Wiktor" class="active" onclick="switchUser('Wiktor')">Wiktor</button>
-            <button id="btn-user-Julia" onclick="switchUser('Julia')">Julia</button>
-        </div>
-    </header>
+<header class="top-nav">
+  <div class="top-title" id="topTitle">Planer</div>
+  <div class="avatars" aria-label="Użytkownik">
+    <button class="avatar active" id="avatar-Wiktor" data-act="user" data-user="Wiktor" aria-label="Wiktor">W</button>
+    <button class="avatar" id="avatar-Julia" data-act="user" data-user="Julia" aria-label="Julia">J</button>
+  </div>
+</header>
 
-    <!-- WIDOK 1: PLANER -->
-    <main id="view-plan" class="container active">
-        <!-- Akcje na samej górze -->
-        <div class="plan-actions-top">
-            <button class="btn-large btn-success" style="margin-bottom: 0;" onclick="exportPlanIngredients()">
-                🛒 Do koszyka
-            </button>
-            <button class="btn-large btn-danger" style="margin-bottom: 0;" onclick="clearWeek()">
-                🧹 Wyczyść plan
-            </button>
-        </div>
-        
-        <div id="plan-cards"></div>
-    </main>
+<!-- PLANER -->
+<main id="view-plan" class="container active">
+  <div class="plan-actions-top">
+    <button class="btn-large btn-success" data-act="export-plan">🛒 Do koszyka</button>
+    <button class="btn-large btn-danger" data-act="clear-week">🧹 Wyczyść plan</button>
+  </div>
+  <div id="plan-cards"></div>
+</main>
 
-    <!-- WIDOK 2: ZAKUPY -->
-    <main id="view-shop" class="container">
-        <div class="shop-add">
-            <input type="text" id="newShopInput" class="input-styled" placeholder="Dodaj produkt do koszyka..." onkeypress="if(event.key==='Enter') addShopItem()">
-            <button class="btn-large btn-primary" style="width: auto; margin:0;" onclick="addShopItem()">Dodaj</button>
-        </div>
-        <div id="shop-list-container"></div>
-        <button class="btn-large btn-danger" style="margin-top:20px;" onclick="clearPurchased()">🗑 Usuń odhaczone</button>
-    </main>
+<!-- ZAKUPY -->
+<main id="view-shop" class="container">
+  <div class="shop-add">
+    <input type="text" id="newShopInput" class="input-styled" placeholder="Dodaj produkt…" autocomplete="off">
+    <input type="text" id="newShopAmount" class="input-styled" style="flex:none;width:80px;padding:14px 8px;text-align:center;" placeholder="Ilość" autocomplete="off">
+    <button class="btn-large btn-primary" style="width:auto;padding:14px 16px;" data-act="add-shop">Dodaj</button>
+  </div>
+  <div id="shop-list-container"></div>
+</main>
 
-    <!-- WIDOK 3: BAZA DAŃ -->
-    <main id="view-baza" class="container">
-        <div class="baza-controls">
-            <input type="text" id="bazaSearch" class="input-styled" placeholder="Szukaj dania..." onkeyup="updateBazaView()">
-            <select id="bazaSort" class="baza-select" onchange="updateBazaView()">
-                <option value="az">A - Z</option>
-                <option value="za">Z - A</option>
-                <option value="cat">Kategoria</option>
-            </select>
-        </div>
-        <div id="baza-list-container"></div>
-    </main>
-    <button id="fab-add" class="fab" onclick="openDishEditor()">+</button>
+<!-- BAZA -->
+<main id="view-baza" class="container">
+  <input type="search" id="bazaSearch" class="input-styled" style="width:100%;margin-bottom:12px;" placeholder="Szukaj dania…" autocomplete="off">
+  <div class="chips" id="catChips"></div>
+  <div id="baza-list-container"></div>
+</main>
+<button id="fab-add" class="fab" data-act="new-dish" aria-label="Nowe danie">+</button>
 
-    <!-- DOLNY PASEK NAWIGACJI -->
-    <nav class="bottom-nav">
-        <div id="tab-plan" class="nav-tab active" onclick="switchTab('plan')">
-            <span class="nav-icon">📅</span> Planer
-        </div>
-        <div id="tab-shop" class="nav-tab" onclick="switchTab('shop')">
-            <span class="nav-icon">🛒</span> Zakupy
-        </div>
-        <div id="tab-baza" class="nav-tab" onclick="switchTab('baza')">
-            <span class="nav-icon">🍲</span> Baza
-        </div>
-    </nav>
+<nav class="bottom-nav">
+  <button id="tab-plan" class="nav-tab active" data-act="tab" data-tab="plan">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Planer
+  </button>
+  <button id="tab-shop" class="nav-tab" data-act="tab" data-tab="shop">
+    <svg viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>Zakupy
+    <span class="nav-badge" id="shopBadge">0</span>
+  </button>
+  <button id="tab-baza" class="nav-tab" data-act="tab" data-tab="baza">
+    <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Baza dań
+  </button>
+</nav>
 
-    <!-- MODAL 1: WYBÓR POSIŁKU DO PLANU -->
-    <div id="foodModal" class="modal">
-        <div class="sheet">
-            <div class="sheet-header">
-                <h3 class="sheet-title">Wybierz danie</h3>
-                <button class="sheet-close" onclick="closeModal('foodModal')">&times;</button>
-            </div>
-            <div style="padding: 16px; background: var(--surface);">
-                <input type="text" id="modalSearch" class="input-styled" style="width:100%;" placeholder="Szukaj dania..." onkeyup="filterModalDishes()">
-            </div>
-            <div class="sheet-body" id="modalDishesList"></div>
-        </div>
+<!-- MODAL: wybór posiłku -->
+<div id="foodModal" class="modal">
+  <div class="sheet">
+    <div class="sheet-header">
+      <div class="sheet-handle"></div>
+      <h3 class="sheet-title" id="foodModalTitle">Opcje posiłku</h3>
+      <button class="sheet-close" data-act="close" data-modal="foodModal" aria-label="Zamknij">&times;</button>
     </div>
-
-    <!-- MODAL 2: EDYTOR DANIA -->
-    <div id="dishModal" class="modal">
-        <div class="sheet">
-            <div class="sheet-header">
-                <h3 class="sheet-title" id="dishModalTitle">Nowe Danie</h3>
-                <button class="sheet-close" onclick="closeModal('dishModal')">&times;</button>
-            </div>
-            <div class="sheet-body">
-                <input type="hidden" id="editDishId">
-                <div class="form-group">
-                    <label class="form-label">Nazwa dania</label>
-                    <input type="text" id="editDishName" class="input-styled" style="width:100%;" placeholder="np. Spaghetti">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Kategoria</label>
-                    <input type="text" id="editDishCat" class="input-styled" style="width:100%;" placeholder="np. Danie główne">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Składniki (oddzielone przecinkiem)</label>
-                    <textarea id="editDishIng" class="input-styled" style="width:100%;" placeholder="Mleko, Jajka, Mąka..."></textarea>
-                </div>
-                <button class="btn-large btn-primary" onclick="saveDish()">Zapisz Danie</button>
-            </div>
-        </div>
+    <div class="sheet-section" id="foodModalExtra"></div>
+    <div class="sheet-section" style="border-top:1px solid var(--border);">
+      <input type="search" id="modalSearch" class="input-styled" style="width:100%;" placeholder="Wybierz danie…" autocomplete="off">
     </div>
+    <div class="sheet-body" id="modalDishesList"></div>
+  </div>
+</div>
 
-    <!-- MODAL 3: WYBÓR SKŁADNIKÓW DO KOSZYKA -->
-    <div id="ingredientModal" class="modal">
-        <div class="sheet">
-            <div class="sheet-header">
-                <h3 class="sheet-title">Wybierz składniki</h3>
-                <button class="sheet-close" onclick="closeModal('ingredientModal')">&times;</button>
-            </div>
-            <div class="sheet-body">
-                <div class="ing-controls">
-                    <button class="btn-action btn-edit" onclick="toggleAllIngredients(true)">Zaznacz wszystkie</button>
-                    <button class="btn-action btn-edit" onclick="toggleAllIngredients(false)">Odznacz</button>
-                </div>
-                <div id="ingredientModalList" style="margin-bottom: 20px;"></div>
-                <button class="btn-large btn-success" onclick="confirmAddIngredients()">🛒 Dodaj do listy zakupów</button>
-            </div>
-        </div>
+<!-- MODAL: edytor dania -->
+<div id="dishModal" class="modal">
+  <div class="sheet">
+    <div class="sheet-header">
+      <div class="sheet-handle"></div>
+      <h3 class="sheet-title" id="dishModalTitle">Nowe danie</h3>
+      <button class="sheet-close" data-act="close" data-modal="dishModal" aria-label="Zamknij">&times;</button>
     </div>
+    <div class="sheet-body">
+      <input type="hidden" id="editDishId">
+      <div class="form-group">
+        <label class="form-label" for="editDishName">Nazwa dania</label>
+        <input type="text" id="editDishName" class="input-styled" style="width:100%;" placeholder="np. Spaghetti">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="editDishCat">Kategoria</label>
+        <input type="text" id="editDishCat" class="input-styled" style="width:100%;" placeholder="np. Obiad" list="catList">
+        <datalist id="catList"></datalist>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="editDishIng">Składniki</label>
+        <textarea id="editDishIng" class="input-styled" style="width:100%;" placeholder="Makaron 500 g&#10;Passata pomidorowa&#10;Mąka 1,5 kg"></textarea>
+        <div class="form-hint">Każdy składnik w nowej linii (lub rozdzielony średnikiem) – dzięki temu przecinek w ilości nie rozbija wpisu.</div>
+      </div>
+      <button class="btn-large btn-primary" data-act="save-dish">Zapisz danie</button>
+    </div>
+  </div>
+</div>
 
-    <!-- Firebase SDK (Modular v10) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getFirestore, collection, doc, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, deleteField
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<!-- MODAL: wybór składników -->
+<div id="ingredientModal" class="modal">
+  <div class="sheet">
+    <div class="sheet-header">
+      <div class="sheet-handle"></div>
+      <h3 class="sheet-title">Wybierz składniki</h3>
+      <button class="sheet-close" data-act="close" data-modal="ingredientModal" aria-label="Zamknij">&times;</button>
+    </div>
+    <div class="sheet-body">
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button class="btn-action btn-edit" data-act="ing-all">Zaznacz wszystkie</button>
+        <button class="btn-action btn-edit" data-act="ing-none">Odznacz</button>
+      </div>
+      <div id="ingredientModalList" style="margin-bottom:20px;"></div>
+      <button class="btn-large btn-success" data-act="ing-confirm">🛒 Dodaj do listy zakupów</button>
+    </div>
+  </div>
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDjITwMC0x5D9uJWOdBVuz7qL8I23sS6Yo",
-            authDomain: "zakupki-177d6.firebaseapp.com",
-            projectId: "zakupki-177d6",
-            storageBucket: "zakupki-177d6.firebasestorage.app",
-            messagingSenderId: "387440133726",
-            appId: "1:387440133726:web:57e13dcea7c3ae979316cf"
-        };
+<!-- TRYB GOTOWANIA -->
+<div id="cookingModal" class="fullscreen-modal">
+  <div class="cooking-header">
+    <div style="min-width:0;">
+      <h2 class="sheet-title" id="cookingTitle" style="font-size:22px;overflow-wrap:anywhere;">Gotowanie</h2>
+      <div id="cookingCount" style="font-size:13px;color:var(--muted);font-weight:600;margin-top:2px;"></div>
+    </div>
+    <button class="btn-large btn-danger" style="width:auto;padding:10px 16px;flex-shrink:0;" data-act="close-cooking">Zakończ</button>
+  </div>
+  <div class="cooking-progress"><div id="cookingBar"></div></div>
+  <div class="cooking-body" id="cookingList"></div>
+</div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+<div id="toast" role="status" aria-live="polite"></div>
 
-        // Zmienne stanu
-        let currentUser = 'Wiktor';
-        let dishes = [];
-        let shoppingItems = [];
-        let currentPlan = {};
-        let activeSelection = { day: null, meal: null };
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  collection, doc, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc, deleteField, writeBatch
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const DNI = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"];
-        const POSILKI = ["Śniadanie", "Obiad", "Kolacja", "Zachcianka"];
+const firebaseConfig = {
+  apiKey: "AIzaSyDjITwMC0x5D9uJWOdBVuz7qL8I23sS6Yo",
+  authDomain: "zakupki-177d6.firebaseapp.com",
+  projectId: "zakupki-177d6",
+  storageBucket: "zakupki-177d6.firebasestorage.app",
+  messagingSenderId: "387440133726",
+  appId: "1:387440133726:web:57e13dcea7c3ae979316cf"
+};
 
-        // --- NAWIGACJA ---
-        window.switchTab = function(tab) {
-            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+const app = initializeApp(firebaseConfig);
+let db;
+try {
+  // Tryb offline: dane z cache, zapisy synchronizują się po powrocie sieci
+  db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+} catch (e) {
+  console.warn('Cache offline niedostępny:', e);
+  db = initializeFirestore(app, {});
+}
 
-            document.getElementById(`view-${tab}`).classList.add('active');
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            document.getElementById('topNav').style.display = tab === 'plan' ? 'block' : 'none';
-            document.getElementById('fab-add').style.display = tab === 'baza' ? 'flex' : 'none';
-        };
+/* ---------- Pomocnicze ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s ?? '').trim().toLowerCase();
+const DNI = ["Poniedziałek","Wtorek","Środa","Czwartek","Piątek"];
+const POSILKI = ["Śniadanie","Obiad","Kolacja","Zachcianka"];
+const TITLES = { plan:'Planer', shop:'Zakupy', baza:'Baza dań' };
 
-        window.switchUser = function(user) {
-            currentUser = user;
-            document.getElementById('btn-user-Wiktor').classList.toggle('active', user === 'Wiktor');
-            document.getElementById('btn-user-Julia').classList.toggle('active', user === 'Julia');
-            listenToPlan();
-        };
+const store = {
+  get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+};
+const vibrate = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch {} };
 
-        // --- BAZA DAŃ Z SORTOWANIEM I FILTROWANIEM ---
-        onSnapshot(collection(db, "dishes"), (snapshot) => {
-            dishes = [];
-            snapshot.forEach(d => dishes.push({ id: d.id, ...d.data() }));
-            updateBazaView();
-        });
+// Zapis bez blokowania UI (offline `await` nigdy by się nie rozwiązał)
+function safe(promise) {
+  return Promise.resolve(promise).catch(err => { console.error(err); toast('Błąd zapisu – sprawdź połączenie'); });
+}
 
-        window.updateBazaView = function() {
-            const query = document.getElementById('bazaSearch').value.toLowerCase();
-            const sortBy = document.getElementById('bazaSort').value;
-            
-            // Filtrowanie
-            let filtered = dishes.filter(d => (d.name || '').toLowerCase().includes(query));
-            
-            // Sortowanie
-            filtered.sort((a, b) => {
-                const nameA = (a.name || '').toLowerCase();
-                const nameB = (b.name || '').toLowerCase();
-                const catA = (a.category || '').toLowerCase();
-                const catB = (b.category || '').toLowerCase();
+/* ---------- Stan ---------- */
+let currentUser = store.get('zakupki_user', 'Wiktor') === 'Julia' ? 'Julia' : 'Wiktor';
+let dishes = [], shoppingItems = [], currentPlan = {};
+let activeSelection = { day:null, meal:null };
+let activeCat = '';
+let showDone = false;
+let wakeLock = null, cookingOpen = false;
+let loaded = { dishes:false, shop:false, plan:false };
+let pendingShopRender = false;
+let didAutoScroll = false;
+let currentTab = 'plan';
 
-                if (sortBy === 'az') return nameA.localeCompare(nameB);
-                if (sortBy === 'za') return nameB.localeCompare(nameA);
-                if (sortBy === 'cat') {
-                    if (catA === catB) return nameA.localeCompare(nameB);
-                    return catA.localeCompare(catB);
-                }
-                return 0;
-            });
+/* ---------- Toast ---------- */
+let toastTimer = null;
+function toast(msg, action) {
+  const t = $('toast');
+  t.innerHTML = `<span>${esc(msg)}</span>` + (action ? `<button type="button" id="toastAction">${esc(action.label)}</button>` : '');
+  t.classList.add('show');
+  if (action) $('toastAction').onclick = () => { action.fn(); t.classList.remove('show'); };
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), action ? 5000 : 2200);
+}
 
-            renderBaza(filtered);
-        };
+/* ---------- Modale ---------- */
+function openModal(id) { $(id).classList.add('open'); }
+function closeModal(id) { $(id).classList.remove('open'); }
 
-        function renderBaza(listToRender) {
-            const container = document.getElementById('baza-list-container');
-            container.innerHTML = '';
-            
-            if(listToRender.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">Brak wyników.</div>';
-                return;
-            }
+// zamykanie po kliknięciu w tło (pointerdown, żeby przeciągnięcie zaznaczenia nie zamykało)
+document.querySelectorAll('.modal').forEach(m => {
+  m.addEventListener('pointerdown', e => { if (e.target === m) closeModal(m.id); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (cookingOpen) return closeCooking();
+    document.querySelectorAll('.modal.open').forEach(m => closeModal(m.id));
+  }
+});
 
-            listToRender.forEach(d => {
-                const item = document.createElement('div');
-                item.className = 'dish-card';
-                const ingText = d.ingredients ? d.ingredients : 'Brak przypisanych składników';
-                
-                item.innerHTML = `
-                    <div class="dish-header">
-                        <div>
-                            <div class="dish-name">${d.name}</div>
-                            ${d.category ? `<div class="dish-cat">${d.category}</div>` : ''}
-                        </div>
-                    </div>
-                    <div class="dish-ingredients">🛒 ${ingText}</div>
-                    
-                    <div class="dish-actions">
-                        <button class="btn-action btn-export" onclick="exportSingleDish('${d.id}')">🛒 Do koszyka</button>
-                        <button class="btn-action btn-edit" onclick="openDishEditor('${d.id}')">✏️ Edytuj</button>
-                        <button class="btn-action btn-del" onclick="deleteDish('${d.id}')">Usuń</button>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
+// przeciągnięcie nagłówka w dół zamyka sheet
+document.querySelectorAll('.sheet').forEach(sheet => {
+  const header = sheet.querySelector('.sheet-header');
+  const modal = sheet.parentElement;
+  let startY = null, dy = 0;
+  header.addEventListener('touchstart', e => { startY = e.touches[0].clientY; dy = 0; sheet.style.animation = 'none'; }, { passive:true });
+  header.addEventListener('touchmove', e => {
+    if (startY === null) return;
+    dy = Math.max(0, e.touches[0].clientY - startY);
+    sheet.style.transform = `translateY(${dy}px)`;
+  }, { passive:true });
+  header.addEventListener('touchend', () => {
+    if (startY === null) return;
+    sheet.style.transition = 'transform .2s';
+    if (dy > 90) closeModal(modal.id);
+    sheet.style.transform = '';
+    setTimeout(() => { sheet.style.transition = ''; sheet.style.animation = ''; }, 220);
+    startY = null;
+  });
+});
 
-        window.openDishEditor = function(id = null) {
-            const title = document.getElementById('dishModalTitle');
-            const idInput = document.getElementById('editDishId');
-            const nameInput = document.getElementById('editDishName');
-            const catInput = document.getElementById('editDishCat');
-            const ingInput = document.getElementById('editDishIng');
+/* ---------- Nawigacja ---------- */
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  $(`view-${tab}`).classList.add('active');
+  $(`tab-${tab}`).classList.add('active');
+  $('topTitle').textContent = TITLES[tab];
+  $('fab-add').classList.toggle('show', tab === 'baza');
+  window.scrollTo(0, 0);
+}
 
-            if (id) {
-                const d = dishes.find(x => x.id === id);
-                title.innerText = "Edytuj Danie";
-                idInput.value = d.id;
-                nameInput.value = d.name || '';
-                catInput.value = d.category || '';
-                ingInput.value = d.ingredients || '';
-            } else {
-                title.innerText = "Nowe Danie";
-                idInput.value = '';
-                nameInput.value = '';
-                catInput.value = '';
-                ingInput.value = '';
-            }
-            document.getElementById('dishModal').style.display = 'flex';
-        };
+function switchUser(user) {
+  currentUser = user;
+  store.set('zakupki_user', user);
+  updateAvatars();
+  loaded.plan = false;
+  renderPlan();
+  listenToPlan();
+}
+function updateAvatars() {
+  $('avatar-Wiktor').classList.toggle('active', currentUser === 'Wiktor');
+  $('avatar-Julia').classList.toggle('active', currentUser === 'Julia');
+}
 
-        window.saveDish = async function() {
-            const id = document.getElementById('editDishId').value;
-            const name = document.getElementById('editDishName').value.trim();
-            const cat = document.getElementById('editDishCat').value.trim();
-            const ing = document.getElementById('editDishIng').value.trim();
+/* ---------- Składniki ---------- */
+function parseIng(str) {
+  if (!str) return [];
+  const sep = /[\n;]/.test(str) ? /[\n;]+/ : /,/;   // stare dane (przecinki) nadal działają
+  return str.split(sep).map(s => s.trim()).filter(Boolean);
+}
+function dedupe(list) {
+  const seen = new Set(), out = [];
+  list.forEach(i => { const k = norm(i); if (!seen.has(k)) { seen.add(k); out.push(i); } });
+  return out;
+}
 
-            if (!name) return alert('Podaj nazwę dania!');
-            const dishData = { name: name, category: cat, ingredients: ing };
+/* ---------- Baza dań ---------- */
+onSnapshot(collection(db, "dishes"), snap => {
+  dishes = [];
+  snap.forEach(d => dishes.push({ id:d.id, ...d.data() }));
+  dishes.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pl'));
+  loaded.dishes = true;
+  renderBaza();
+  renderPlan();
+  updateCatList();
+}, err => { console.error(err); toast('Brak dostępu do bazy dań'); });
 
-            if (id) {
-                await updateDoc(doc(db, "dishes", id), dishData);
-            } else {
-                await addDoc(collection(db, "dishes"), dishData);
-            }
-            closeModal('dishModal');
-        };
+function updateCatList() {
+  $('catList').innerHTML = [...new Set(dishes.map(d => d.category).filter(Boolean))]
+    .map(c => `<option value="${esc(c)}">`).join('');
+}
 
-        window.deleteDish = async function(id) {
-            if (confirm("Na pewno usunąć to danie?")) {
-                await deleteDoc(doc(db, "dishes", id));
-            }
-        };
+function renderBaza() {
+  const container = $('baza-list-container');
+  if (!loaded.dishes) { container.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>'; return; }
 
-        // --- EKSPORT SKŁADNIKÓW DO KOSZYKA ---
-        window.exportSingleDish = function(id) {
-            const d = dishes.find(x => x.id === id);
-            if (!d || !d.ingredients) return alert('To danie nie ma wpisanych składników.');
-            
-            const ingList = d.ingredients.split(',').map(i => i.trim()).filter(i => i);
-            if(ingList.length === 0) return alert('Brak składników do eksportu.');
-            
-            openIngredientModal(ingList);
-        };
+  // chipsy kategorii
+  const cats = [...new Set(dishes.map(d => d.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pl'));
+  if (activeCat && !cats.includes(activeCat)) activeCat = '';
+  $('catChips').innerHTML =
+    `<button class="chip ${activeCat ? '' : 'active'}" data-act="cat" data-cat="">Wszystkie</button>` +
+    cats.map(c => `<button class="chip ${c === activeCat ? 'active' : ''}" data-act="cat" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
 
-        window.exportPlanIngredients = function() {
-            const planDishes = Object.values(currentPlan).filter(d => d && d !== "");
-            if(planDishes.length === 0) return alert('Plan jest pusty.');
-            
-            let allIngs = [];
-            planDishes.forEach(dishName => {
-                const d = dishes.find(x => x.name === dishName);
-                if (d && d.ingredients) {
-                    allIngs.push(...d.ingredients.split(',').map(i => i.trim()).filter(i => i));
-                }
-            });
-            
-            if(allIngs.length === 0) return alert('Dania w planie nie mają uzupełnionych składników.');
-            
-            allIngs = [...new Set(allIngs)];
-            openIngredientModal(allIngs);
-        };
+  const q = norm($('bazaSearch').value);
+  const list = dishes.filter(d => norm(d.name).includes(q) && (!activeCat || d.category === activeCat));
 
-        window.openIngredientModal = function(ingList) {
-            const listDiv = document.getElementById('ingredientModalList');
-            listDiv.innerHTML = '';
-            
-            ingList.forEach((ing, index) => {
-                const item = document.createElement('div');
-                item.className = 'shop-item'; 
-                item.style.marginBottom = '6px';
-                item.innerHTML = `
-                    <input type="checkbox" class="shop-check ing-export-checkbox" id="exp_${index}" value="${ing}" checked>
-                    <label class="shop-name" for="exp_${index}" style="cursor:pointer;">${ing}</label>
-                `;
-                listDiv.appendChild(item);
-            });
-            
-            document.getElementById('ingredientModal').style.display = 'flex';
-        };
+  if (dishes.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="big">🍲</div><div class="t">Baza dań jest pusta</div><div class="s">Dodaj pierwsze danie przyciskiem +</div></div>`;
+    return;
+  }
+  if (list.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="big">🔍</div><div class="t">Brak wyników</div></div>`;
+    return;
+  }
 
-        window.toggleAllIngredients = function(checked) {
-            const checkboxes = document.querySelectorAll('.ing-export-checkbox');
-            checkboxes.forEach(cb => cb.checked = checked);
-        };
+  container.innerHTML = list.map(d => {
+    const ings = parseIng(d.ingredients);
+    return `
+      <div class="dish-card">
+        <div class="dish-name">${esc(d.name)}</div>
+        <div class="dish-meta">
+          ${d.category ? `<span class="dish-cat">${esc(d.category)}</span>` : ''}
+          <span class="dish-count">${ings.length} ${ings.length === 1 ? 'składnik' : 'składn.'}</span>
+        </div>
+        ${ings.length ? `<div class="dish-ingredients" data-act="toggle-ing">🛒 ${esc(ings.join(' · '))}</div>` : ''}
+        <div class="dish-actions">
+          <button class="btn-action btn-cook" data-act="cook" data-id="${esc(d.id)}">👨‍🍳 Gotuj</button>
+          <button class="btn-action btn-export" data-act="export-dish" data-id="${esc(d.id)}">🛒 Koszyk</button>
+          <button class="btn-action btn-edit" data-act="edit-dish" data-id="${esc(d.id)}">✏️ Edytuj</button>
+          <button class="btn-action btn-del" data-act="del-dish" data-id="${esc(d.id)}">Usuń</button>
+        </div>
+      </div>`;
+  }).join('');
+}
 
-        window.confirmAddIngredients = async function() {
-            const checkboxes = document.querySelectorAll('.ing-export-checkbox:checked');
-            if(checkboxes.length === 0) return alert('Nie wybrano żadnych składników!');
+function openDishEditor(id = null) {
+  const d = id ? dishes.find(x => x.id === id) : null;
+  $('dishModalTitle').textContent = d ? 'Edytuj danie' : 'Nowe danie';
+  $('editDishId').value = d ? d.id : '';
+  $('editDishName').value = d ? (d.name || '') : '';
+  $('editDishCat').value = d ? (d.category || '') : '';
+  $('editDishIng').value = d ? parseIng(d.ingredients).join('\n') : '';
+  openModal('dishModal');
+}
 
-            for (let cb of checkboxes) {
-                await addDoc(collection(db, "shopping"), { name: cb.value, amount: "", checked: false, createdAt: Date.now() });
-            }
-            
-            closeModal('ingredientModal');
-            alert('Dodano wybrane składniki do listy zakupów!');
-            switchTab('shop');
-        };
+function saveDish() {
+  const id = $('editDishId').value;
+  const name = $('editDishName').value.trim();
+  if (!name) { toast('Podaj nazwę dania'); return; }
+  const data = {
+    name,
+    category: $('editDishCat').value.trim(),
+    ingredients: parseIng($('editDishIng').value).join('\n')
+  };
+  safe(id ? updateDoc(doc(db, "dishes", id), data) : addDoc(collection(db, "dishes"), data));
+  closeModal('dishModal');
+  toast(id ? 'Zapisano zmiany' : 'Dodano danie');
+}
 
-        // --- PLANER POSIŁKÓW ---
-        let unsubscribePlan = null;
-        function listenToPlan() {
-            if (unsubscribePlan) unsubscribePlan();
-            unsubscribePlan = onSnapshot(doc(db, "plans", currentUser), (snap) => {
-                currentPlan = snap.exists() ? snap.data() : {};
-                renderPlan();
-            });
-        }
-        listenToPlan();
+function deleteDish(id) {
+  const d = dishes.find(x => x.id === id);
+  if (!d) return;
+  if (!confirm(`Na pewno usunąć „${d.name}"?`)) return;
+  const backup = { ...d }; delete backup.id;
+  safe(deleteDoc(doc(db, "dishes", id)));
+  toast('Usunięto danie', { label:'Cofnij', fn:() => safe(setDoc(doc(db, "dishes", id), backup)) });
+}
 
-        function renderPlan() {
-            const container = document.getElementById('plan-cards');
-            container.innerHTML = '';
+/* ---------- Tryb gotowania ---------- */
+async function requestWakeLock() {
+  try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }
+  catch (err) { console.log('Wake Lock odrzucony:', err); }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && cookingOpen) requestWakeLock();
+});
 
-            DNI.forEach(dzien => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-header">
-                        <div class="card-title">${dzien}</div>
-                        <button class="btn-icon" onclick="clearDay('${dzien}')">🧹</button>
-                    </div>
-                `;
+function startCooking(id) {
+  const d = dishes.find(x => x.id === id);
+  if (!d) return;
+  closeModal('foodModal');
+  $('cookingTitle').textContent = `👨‍🍳 ${d.name}`;
+  const list = parseIng(d.ingredients);
+  const body = $('cookingList');
+  body.dataset.total = list.length;
+  body.innerHTML = list.length
+    ? '<div id="cookDone"></div>' + list.map(ing => `
+        <div class="cooking-item pressable" data-act="cook-item" role="checkbox" aria-checked="false">
+          <input type="checkbox" class="cook-check" tabindex="-1">
+          <div class="cook-name">${esc(ing)}</div>
+        </div>`).join('')
+    : '<div class="empty-state"><div class="big">📝</div><div class="t">Brak składników</div><div class="s">Dodaj je w edycji dania</div></div>';
+  updateCookProgress();
+  $('cookingModal').classList.add('open');
+  cookingOpen = true;
+  requestWakeLock();
+}
 
-                POSILKI.forEach(posilek => {
-                    const key = `${dzien}_${posilek}`;
-                    const dish = currentPlan[key];
-                    const isFilled = dish && dish !== "";
+function updateCookProgress() {
+  const body = $('cookingList');
+  const total = Number(body.dataset.total || 0);
+  const done = body.querySelectorAll('.cooking-item.done').length;
+  $('cookingCount').textContent = total ? `${done} / ${total}` : '';
+  $('cookingBar').style.width = total ? `${(done / total) * 100}%` : '0';
+  const banner = $('cookDone');
+  if (banner) banner.innerHTML = total && done === total ? '<div class="cook-done">🎉 Wszystko gotowe – smacznego!</div>' : '';
+}
 
-                    const row = document.createElement('div');
-                    row.className = 'meal-row';
-                    row.innerHTML = `
-                        <div class="meal-label">${posilek}</div>
-                        <div class="meal-box ${isFilled ? 'filled' : ''}" onclick="openFoodModal('${dzien}', '${posilek}')">
-                            ${isFilled ? dish : "+ Wybierz"}
-                        </div>
-                    `;
-                    card.appendChild(row);
-                });
-                container.appendChild(card);
-            });
-        }
+function closeCooking() {
+  $('cookingModal').classList.remove('open');
+  cookingOpen = false;
+  if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+}
 
-        window.clearDay = async function(day) {
-            if(!confirm(`Wyczyścić plan na ${day}?`)) return;
-            const updates = {};
-            POSILKI.forEach(meal => { updates[`${day}_${meal}`] = deleteField(); });
-            await updateDoc(doc(db, "plans", currentUser), updates);
-        };
+/* ---------- Eksport składników do listy zakupów ---------- */
+function exportSingleDish(id) {
+  const d = dishes.find(x => x.id === id);
+  const ings = d ? parseIng(d.ingredients) : [];
+  if (!ings.length) return toast('To danie nie ma składników');
+  openIngredientModal(dedupe(ings));
+}
 
-        window.clearWeek = async function() {
-            if(!confirm(`Wyczyścić cały tydzień dla: ${currentUser}?`)) return;
-            const updates = {};
-            DNI.forEach(day => { POSILKI.forEach(meal => { updates[`${day}_${meal}`] = deleteField(); }); });
-            await updateDoc(doc(db, "plans", currentUser), updates);
-        };
+function exportPlanIngredients() {
+  const ids = Object.values(currentPlan).filter(Boolean);
+  if (!ids.length) return toast('Plan jest pusty');
+  let all = [];
+  ids.forEach(v => { const d = resolveDish(v); if (d) all.push(...parseIng(d.ingredients)); });
+  all = dedupe(all);
+  if (!all.length) return toast('Dania w planie nie mają składników');
+  openIngredientModal(all);
+}
 
-        window.openFoodModal = function(day, meal) {
-            activeSelection = { day, meal };
-            document.getElementById('modalSearch').value = '';
-            filterModalDishes();
-            document.getElementById('foodModal').style.display = 'flex';
-        };
+function openIngredientModal(list) {
+  const onList = new Set(shoppingItems.filter(i => !i.checked).map(i => norm(i.name)));
+  $('ingredientModalList').innerHTML = list.map((ing, i) => {
+    const exists = onList.has(norm(ing));
+    return `
+      <div class="shop-item" style="margin-bottom:6px;">
+        <input type="checkbox" class="shop-check ing-export-checkbox" id="exp_${i}" data-name="${esc(ing)}" ${exists ? '' : 'checked'}>
+        <label class="shop-name" for="exp_${i}" style="cursor:pointer;">${esc(ing)}
+          ${exists ? '<span style="font-size:12px;color:var(--muted);display:block;">już na liście</span>' : ''}
+        </label>
+      </div>`;
+  }).join('');
+  openModal('ingredientModal');
+}
 
-        window.filterModalDishes = function() {
-            const q = document.getElementById('modalSearch').value.toLowerCase();
-            const filtered = dishes.filter(d => d.name.toLowerCase().includes(q));
-            
-            const c = document.getElementById('modalDishesList');
-            c.innerHTML = '<div class="modal-item" style="color: var(--danger); text-align:center;" onclick="selectDishForPlan(null)">Odznacz / Wyczyść pole</div>';
-            filtered.forEach(d => {
-                const el = document.createElement('div');
-                el.className = 'modal-item';
-                el.innerText = d.name;
-                el.onclick = () => selectDishForPlan(d.name);
-                c.appendChild(el);
-            });
-        };
+function confirmAddIngredients() {
+  const checked = [...document.querySelectorAll('.ing-export-checkbox:checked')];
+  if (!checked.length) return toast('Nie wybrano składników');
+  const onList = new Set(shoppingItems.filter(i => !i.checked).map(i => norm(i.name)));
+  const names = checked.map(cb => cb.dataset.name).filter(n => !onList.has(norm(n)));
+  if (!names.length) { closeModal('ingredientModal'); return toast('Wszystko już jest na liście'); }
+  const batch = writeBatch(db);
+  const now = Date.now();
+  names.forEach((name, i) => batch.set(doc(collection(db, "shopping")), { name, amount:"", checked:false, createdAt: now + i }));
+  safe(batch.commit());
+  closeModal('ingredientModal');
+  toast(`Dodano ${names.length} ${names.length === 1 ? 'produkt' : 'produkty/ów'}`);
+  switchTab('shop');
+}
 
-        window.selectDishForPlan = async function(dishName) {
-            closeModal('foodModal');
-            const key = `${activeSelection.day}_${activeSelection.meal}`;
-            const ref = doc(db, "plans", currentUser);
-            
-            if (dishName === null) {
-                await updateDoc(ref, { [key]: deleteField() }).catch(e => setDoc(ref, {}));
-            } else {
-                await setDoc(ref, { [key]: dishName }, { merge: true });
-            }
-        };
+/* ---------- Planer ---------- */
+let unsubscribePlan = null;
+function listenToPlan() {
+  if (unsubscribePlan) unsubscribePlan();
+  unsubscribePlan = onSnapshot(doc(db, "plans", currentUser), snap => {
+    currentPlan = snap.exists() ? snap.data() : {};
+    loaded.plan = true;
+    renderPlan();
+  }, err => { console.error(err); toast('Brak dostępu do planu'); });
+}
 
-        // --- ZAKUPY ---
-        onSnapshot(collection(db, "shopping"), (snapshot) => {
-            shoppingItems = [];
-            snapshot.forEach(d => shoppingItems.push({ id: d.id, ...d.data() }));
-            shoppingItems.sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
-            renderShopping();
-        });
+// plan trzyma ID dania; starsze wpisy (nazwy) też działają
+function resolveDish(val) {
+  if (!val) return null;
+  return dishes.find(d => d.id === val) || dishes.find(d => d.name === val) || null;
+}
+function planLabel(val) {
+  const d = resolveDish(val);
+  if (d) return d.name;
+  if (!loaded.dishes) return '…';
+  return /^[A-Za-z0-9]{20}$/.test(val) ? 'Usunięte danie' : val;
+}
+function todayIndex() {
+  const g = new Date().getDay();   // 0 = niedziela
+  return g >= 1 && g <= 5 ? g - 1 : -1;
+}
 
-        function renderShopping() {
-            const c = document.getElementById('shop-list-container');
-            c.innerHTML = '';
-            shoppingItems.forEach(item => {
-                const el = document.createElement('div');
-                el.className = `shop-item ${item.checked ? 'checked' : ''}`;
-                el.innerHTML = `
-                    <input type="checkbox" class="shop-check" ${item.checked ? 'checked' : ''} onchange="toggleShopCheck('${item.id}', this.checked)">
-                    <div class="shop-name">${item.name}</div>
-                    <input type="text" class="shop-amount" value="${item.amount || ''}" placeholder="Ilość" onchange="updateShopAmount('${item.id}', this.value)">
-                `;
-                c.appendChild(el);
-            });
-        }
+function renderPlan() {
+  const container = $('plan-cards');
+  if (!loaded.plan) { container.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'; return; }
+  const today = todayIndex();
 
-        window.addShopItem = async function() {
-            const input = document.getElementById('newShopInput');
-            const name = input.value.trim();
-            if (!name) return;
-            input.value = '';
-            await addDoc(collection(db, "shopping"), { name: name, amount: "", checked: false, createdAt: Date.now() });
-        };
+  container.innerHTML = DNI.map((dzien, i) => {
+    const cls = i === today ? 'today' : (today > -1 && i < today ? 'past' : '');
+    const rows = POSILKI.map(posilek => {
+      const val = currentPlan[`${dzien}_${posilek}`];
+      const filled = !!val;
+      return `
+        <div class="meal-row">
+          <div class="meal-label">${posilek}</div>
+          <button class="meal-box ${filled ? '' : 'empty'}" data-act="pick" data-day="${dzien}" data-meal="${posilek}">
+            ${filled ? esc(planLabel(val)) : '+ Wybierz'}
+          </button>
+        </div>`;
+    }).join('');
+    return `
+      <div class="card ${cls}" id="card-${i}">
+        <div class="card-header">
+          <div class="card-title">${dzien}${i === today ? '<span class="badge-today">Dziś</span>' : ''}</div>
+          <button class="btn-icon" data-act="clear-day" data-day="${dzien}" aria-label="Wyczyść ${dzien}">🧹</button>
+        </div>
+        ${rows}
+      </div>`;
+  }).join('');
 
-        window.toggleShopCheck = async function(id, isChecked) {
-            await updateDoc(doc(db, "shopping", id), { checked: isChecked });
-        };
+  if (!didAutoScroll && today > -1) {
+    didAutoScroll = true;
+    requestAnimationFrame(() => $(`card-${today}`)?.scrollIntoView({ block:'center' }));
+  }
+}
 
-        window.updateShopAmount = async function(id, val) {
-            await updateDoc(doc(db, "shopping", id), { amount: val });
-        };
+function clearDay(day) {
+  if (!confirm(`Wyczyścić plan na ${day}?`)) return;
+  const updates = {};
+  POSILKI.forEach(m => { updates[`${day}_${m}`] = deleteField(); });
+  safe(setDoc(doc(db, "plans", currentUser), updates, { merge:true }));
+}
+function clearWeek() {
+  if (!confirm(`Wyczyścić cały tydzień dla: ${currentUser}?`)) return;
+  const updates = {};
+  DNI.forEach(day => POSILKI.forEach(m => { updates[`${day}_${m}`] = deleteField(); }));
+  safe(setDoc(doc(db, "plans", currentUser), updates, { merge:true }));
+}
 
-        window.clearPurchased = async function() {
-            const toDelete = shoppingItems.filter(i => i.checked);
-            for (const item of toDelete) {
-                await deleteDoc(doc(db, "shopping", item.id));
-            }
-        };
+function openFoodModal(day, meal) {
+  activeSelection = { day, meal };
+  $('foodModalTitle').textContent = `${day} · ${meal}`;
+  const current = resolveDish(currentPlan[`${day}_${meal}`]);
+  const extra = $('foodModalExtra');
+  if (current) {
+    extra.innerHTML = `<button class="btn-large btn-success" style="margin:0;" data-act="cook" data-id="${esc(current.id)}">👨‍🍳 Gotuj: ${esc(current.name)}</button>`;
+    extra.style.display = 'block';
+  } else extra.style.display = 'none';
+  $('modalSearch').value = '';
+  filterModalDishes();
+  openModal('foodModal');
+}
 
-        // Modal Controls
-        window.closeModal = function(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-        window.onclick = function(e) {
-            if (e.target.classList.contains('modal')) e.target.style.display = 'none';
-        };
-    </script>
+function filterModalDishes() {
+  const q = norm($('modalSearch').value);
+  const list = dishes.filter(d => norm(d.name).includes(q));
+  const hasCurrent = !!currentPlan[`${activeSelection.day}_${activeSelection.meal}`];
+  $('modalDishesList').innerHTML =
+    (hasCurrent ? '<button class="modal-item" style="color:var(--danger);text-align:center;" data-act="pick-dish" data-id="">Wyczyść to pole</button>' : '') +
+    (list.length
+      ? list.map(d => `<button class="modal-item" data-act="pick-dish" data-id="${esc(d.id)}">${esc(d.name)}${d.category ? `<span style="float:right;font-size:12px;color:var(--muted);">${esc(d.category)}</span>` : ''}</button>`).join('')
+      : '<div class="empty-state" style="padding:24px;"><div class="s">Brak pasujących dań</div></div>');
+}
+
+function selectDishForPlan(id) {
+  closeModal('foodModal');
+  const key = `${activeSelection.day}_${activeSelection.meal}`;
+  safe(setDoc(doc(db, "plans", currentUser), { [key]: id ? id : deleteField() }, { merge:true }));
+}
+
+/* ---------- Zakupy ---------- */
+onSnapshot(collection(db, "shopping"), snap => {
+  shoppingItems = [];
+  snap.forEach(d => shoppingItems.push({ id:d.id, ...d.data() }));
+  shoppingItems.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  loaded.shop = true;
+  renderShopping();
+}, err => { console.error(err); toast('Brak dostępu do listy zakupów'); });
+
+function shopItemHTML(item) {
+  return `
+    <div class="shop-item ${item.checked ? 'checked' : ''}">
+      <input type="checkbox" class="shop-check" data-id="${esc(item.id)}" ${item.checked ? 'checked' : ''} aria-label="Kupione: ${esc(item.name)}">
+      <div class="shop-name">${esc(item.name)}</div>
+      <input type="text" class="shop-amount" data-id="${esc(item.id)}" value="${esc(item.amount || '')}" placeholder="ilość" aria-label="Ilość">
+      <button class="shop-del" data-act="del-shop" data-id="${esc(item.id)}" aria-label="Usuń">&times;</button>
+    </div>`;
+}
+
+function renderShopping() {
+  const todo = shoppingItems.filter(i => !i.checked);
+  const done = shoppingItems.filter(i => i.checked);
+
+  const badge = $('shopBadge');
+  badge.textContent = todo.length;
+  badge.classList.toggle('show', todo.length > 0);
+
+  // nie przerysowuj, gdy ktoś właśnie wpisuje ilość
+  if (document.activeElement && document.activeElement.classList.contains('shop-amount')) { pendingShopRender = true; return; }
+  pendingShopRender = false;
+
+  const c = $('shop-list-container');
+  if (!loaded.shop) { c.innerHTML = '<div class="skeleton sm"></div><div class="skeleton sm"></div><div class="skeleton sm"></div>'; return; }
+  if (!shoppingItems.length) {
+    c.innerHTML = `<div class="empty-state"><div class="big">🛒</div><div class="t">Lista zakupów jest pusta</div><div class="s">Dodaj produkt powyżej albo wyślij składniki z planera</div></div>`;
+    return;
+  }
+
+  let html = `<div class="section-head"><span>Do kupienia · ${todo.length}</span></div>`;
+  html += todo.length ? todo.map(shopItemHTML).join('') : `<div class="empty-state" style="padding:24px;"><div class="big" style="font-size:40px;">✅</div><div class="s">Wszystko w koszyku!</div></div>`;
+
+  if (done.length) {
+    html += `<button class="section-head section-toggle" data-act="toggle-done" style="margin-top:18px;"><span>W koszyku · ${done.length}</span><span>${showDone ? '▾' : '▸'}</span></button>`;
+    if (showDone) {
+      html += done.map(shopItemHTML).join('');
+      html += `<button class="btn-large btn-danger" style="margin-top:12px;" data-act="clear-purchased">🗑 Usuń odhaczone</button>`;
+    }
+  }
+  c.innerHTML = html;
+}
+
+document.addEventListener('focusout', e => {
+  if (e.target.classList && e.target.classList.contains('shop-amount') && pendingShopRender) {
+    setTimeout(renderShopping, 50);
+  }
+});
+
+function addShopItem() {
+  const nameInput = $('newShopInput'), amountInput = $('newShopAmount');
+  const name = nameInput.value.trim(), amount = amountInput.value.trim();
+  if (!name) return;
+  if (shoppingItems.some(i => !i.checked && norm(i.name) === norm(name))) {
+    toast(`„${name}" już jest na liście`);
+    return;
+  }
+  nameInput.value = ''; amountInput.value = '';
+  nameInput.focus();
+  safe(addDoc(collection(db, "shopping"), { name, amount, checked:false, createdAt:Date.now() }));
+}
+
+function deleteShopItem(id) {
+  const item = shoppingItems.find(i => i.id === id);
+  if (!item) return;
+  const backup = { ...item }; delete backup.id;
+  safe(deleteDoc(doc(db, "shopping", id)));
+  toast(`Usunięto: ${item.name}`, { label:'Cofnij', fn:() => safe(setDoc(doc(db, "shopping", id), backup)) });
+}
+
+function clearPurchased() {
+  const items = shoppingItems.filter(i => i.checked);
+  if (!items.length) return;
+  const backups = items.map(i => { const { id, ...rest } = i; return [id, rest]; });
+  const batch = writeBatch(db);
+  items.forEach(i => batch.delete(doc(db, "shopping", i.id)));
+  safe(batch.commit());
+  toast(`Usunięto ${items.length}`, { label:'Cofnij', fn:() => {
+    const b = writeBatch(db);
+    backups.forEach(([id, data]) => b.set(doc(db, "shopping", id), data));
+    safe(b.commit());
+  }});
+}
+
+/* ---------- Obsługa zdarzeń (delegacja) ---------- */
+const actions = {
+  tab: el => switchTab(el.dataset.tab),
+  user: el => switchUser(el.dataset.user),
+  close: el => closeModal(el.dataset.modal),
+  'close-cooking': () => closeCooking(),
+  'export-plan': () => exportPlanIngredients(),
+  'clear-week': () => clearWeek(),
+  'clear-day': el => clearDay(el.dataset.day),
+  pick: el => openFoodModal(el.dataset.day, el.dataset.meal),
+  'pick-dish': el => selectDishForPlan(el.dataset.id),
+  cook: el => startCooking(el.dataset.id),
+  'cook-item': el => {
+    el.classList.toggle('done');
+    const cb = el.querySelector('.cook-check');
+    cb.checked = el.classList.contains('done');
+    el.setAttribute('aria-checked', cb.checked);
+    vibrate(10);
+    updateCookProgress();
+  },
+  'add-shop': () => addShopItem(),
+  'del-shop': el => deleteShopItem(el.dataset.id),
+  'toggle-done': () => { showDone = !showDone; renderShopping(); },
+  'clear-purchased': () => clearPurchased(),
+  cat: el => { activeCat = el.dataset.cat; renderBaza(); },
+  'new-dish': () => openDishEditor(),
+  'edit-dish': el => openDishEditor(el.dataset.id),
+  'save-dish': () => saveDish(),
+  'del-dish': el => deleteDish(el.dataset.id),
+  'export-dish': el => exportSingleDish(el.dataset.id),
+  'toggle-ing': el => el.classList.toggle('open'),
+  'ing-all': () => document.querySelectorAll('.ing-export-checkbox').forEach(cb => cb.checked = true),
+  'ing-none': () => document.querySelectorAll('.ing-export-checkbox').forEach(cb => cb.checked = false),
+  'ing-confirm': () => confirmAddIngredients()
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const fn = actions[el.dataset.act];
+  if (fn) fn(el, e);
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.classList.contains('shop-check') && t.dataset.id) {
+    vibrate(10);
+    safe(updateDoc(doc(db, "shopping", t.dataset.id), { checked: t.checked }));
+  } else if (t.classList.contains('shop-amount')) {
+    safe(updateDoc(doc(db, "shopping", t.dataset.id), { amount: t.value.trim() }));
+  }
+});
+
+$('newShopInput').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });
+$('newShopAmount').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });
+$('bazaSearch').addEventListener('input', renderBaza);
+$('modalSearch').addEventListener('input', filterModalDishes);
+
+/* ---------- Start ---------- */
+updateAvatars();
+renderPlan();
+renderBaza();
+renderShopping();
+listenToPlan();
+</script>
 </body>
 </html>
