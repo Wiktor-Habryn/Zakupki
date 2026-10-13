@@ -38,6 +38,7 @@
         .card-title { font-size: 18px; font-weight: 700; color: var(--primary); }
         
         /* Planer Elements */
+        .plan-actions-top { display: flex; gap: 8px; margin-bottom: 16px; }
         .meal-row { display: flex; align-items: center; margin-bottom: 12px; }
         .meal-row:last-child { margin-bottom: 0; }
         .meal-label { width: 90px; font-size: 14px; font-weight: 600; color: var(--muted); }
@@ -46,7 +47,7 @@
         
         /* Buttons */
         .btn-icon { background: var(--bg); border: none; width: 32px; height: 32px; border-radius: 16px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 14px; color: var(--muted); }
-        .btn-large { width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .btn-large { width: 100%; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-danger { background: var(--danger-bg); color: var(--danger); }
         .btn-success { background: #e4f8ea; color: var(--success); }
@@ -116,13 +117,17 @@
 
     <!-- WIDOK 1: PLANER -->
     <main id="view-plan" class="container active">
+        <!-- Akcje na samej górze -->
+        <div class="plan-actions-top">
+            <button class="btn-large btn-success" style="margin-bottom: 0;" onclick="exportPlanIngredients()">
+                🛒 Do koszyka
+            </button>
+            <button class="btn-large btn-danger" style="margin-bottom: 0;" onclick="clearWeek()">
+                🧹 Wyczyść plan
+            </button>
+        </div>
+        
         <div id="plan-cards"></div>
-        <button class="btn-large btn-success" onclick="exportPlanIngredients()">
-            🛒 Wyślij składniki z planu na zakupy
-        </button>
-        <button class="btn-large btn-danger" onclick="clearWeek()">
-            🧹 Wyczyść cały tydzień
-        </button>
     </main>
 
     <!-- WIDOK 2: ZAKUPY -->
@@ -380,7 +385,7 @@
             }
         };
 
-        // --- EKSPORT SKŁADNIKÓW DO KOSZYKA (NOWY MECHANIZM) ---
+        // --- EKSPORT SKŁADNIKÓW DO KOSZYKA ---
         window.exportSingleDish = function(id) {
             const d = dishes.find(x => x.id === id);
             if (!d || !d.ingredients) return alert('To danie nie ma wpisanych składników.');
@@ -405,7 +410,6 @@
             
             if(allIngs.length === 0) return alert('Dania w planie nie mają uzupełnionych składników.');
             
-            // Usunięcie duplikatów
             allIngs = [...new Set(allIngs)];
             openIngredientModal(allIngs);
         };
@@ -416,7 +420,7 @@
             
             ingList.forEach((ing, index) => {
                 const item = document.createElement('div');
-                item.className = 'shop-item'; // Używamy stylu elementu listy zakupów
+                item.className = 'shop-item'; 
                 item.style.marginBottom = '6px';
                 item.innerHTML = `
                     <input type="checkbox" class="shop-check ing-export-checkbox" id="exp_${index}" value="${ing}" checked>
@@ -507,7 +511,7 @@
         window.openFoodModal = function(day, meal) {
             activeSelection = { day, meal };
             document.getElementById('modalSearch').value = '';
-            filterModalDishes(); // Render and apply search
+            filterModalDishes();
             document.getElementById('foodModal').style.display = 'flex';
         };
 
