@@ -3,242 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Planer i Zakupy</title>
+    <title>Zakupki & Planer</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <style>
-        :root { --primary: #4CAF50; --bg: #f4f7f6; --surface: #ffffff; --text: #333; --border: #e0e0e0; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding-bottom: 80px; }
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #e8f5e9;
+            --bg: #f4f7f6;
+            --surface: #ffffff;
+            --text: #212121;
+            --muted: #757575;
+            --border: #e0e0e0;
+            --danger: #d32f2f;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 85px; }
+
+        /* Top Nav */
+        .top-nav { display: flex; justify-content: center; background: var(--surface); padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .user-switch { display: flex; background: #eee; border-radius: 25px; padding: 3px; }
+        .user-switch button { border: none; background: none; padding: 8px 24px; border-radius: 20px; font-size: 15px; font-weight: bold; color: var(--muted); cursor: pointer; transition: 0.2s; }
+        .user-switch button.active { background: var(--primary); color: #fff; }
+
+        .container { padding: 15px; max-width: 700px; margin: 0 auto; display: none; }
+        .container.active { display: block; }
+
+        /* Planer */
+        .day-card { background: var(--surface); border-radius: 12px; margin-bottom: 16px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .day-title { font-size: 17px; font-weight: bold; color: var(--primary); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+        .meal-row { display: flex; align-items: center; margin-bottom: 10px; }
+        .meal-label { width: 95px; font-size: 14px; font-weight: 600; color: var(--muted); }
+        .meal-box { flex: 1; background: #fafafa; border: 1px dashed #bdbdbd; padding: 10px 14px; border-radius: 8px; font-size: 15px; cursor: pointer; min-height: 42px; display: flex; align-items: center; }
+        .meal-box.filled { background: var(--primary-light); border: 1px solid var(--primary); font-weight: 500; }
+
+        /* Lista Zakupów */
+        .add-row { display: flex; gap: 8px; margin-bottom: 16px; }
+        .input-text { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 16px; outline: none; background: var(--surface); }
+        .btn-add { padding: 0 20px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-clear { width: 100%; padding: 12px; background: var(--danger); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; margin-top: 20px; cursor: pointer; }
         
-        .navbar { display: flex; justify-content: center; background: var(--surface); padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .user-switch { display: flex; background: #eee; border-radius: 25px; overflow: hidden; }
-        .user-switch button { flex: 1; padding: 10px 30px; border: none; background: none; font-size: 16px; font-weight: bold; color: #777; cursor: pointer; }
-        .user-switch button.active { background: var(--primary); color: white; }
+        .shop-item { display: flex; align-items: center; background: var(--surface); padding: 12px 14px; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .shop-item.checked { opacity: 0.55; }
+        .shop-item.checked .shop-name { text-decoration: line-through; }
+        .shop-check { width: 22px; height: 22px; margin-right: 12px; accent-color: var(--primary); cursor: pointer; }
+        .shop-name { flex: 1; font-size: 16px; font-weight: 500; }
+        .shop-amount { width: 85px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; text-align: center; }
 
-        .loader { text-align: center; padding: 40px; font-weight: bold; color: #888; display: none; }
-        .view-container { padding: 15px; max-width: 800px; margin: 0 auto; display: none; }
-        .view-container.active { display: block; }
+        /* Baza Dań */
+        .baza-card { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 12px 14px; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .baza-name { font-weight: 600; font-size: 15px; }
+        .baza-cat { font-size: 12px; color: var(--muted); margin-top: 2px; }
+        .btn-del { background: none; border: none; color: var(--danger); font-size: 18px; cursor: pointer; padding: 4px 8px; }
 
-        .day-card { background: var(--surface); border-radius: 12px; margin-bottom: 20px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .day-title { font-size: 18px; margin-bottom: 15px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        .meal-row { display: flex; align-items: center; margin-bottom: 12px; }
-        .meal-label { width: 90px; font-size: 14px; font-weight: bold; color: #555; }
-        .meal-box { flex: 1; background: #f9f9f9; border: 1px dashed #ccc; padding: 12px; border-radius: 8px; font-size: 15px; min-height: 44px; display: flex; align-items: center; cursor: pointer; }
-        .meal-box.filled { background: #e8f5e9; border-color: var(--primary); border-style: solid; }
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface); display: flex; border-top: 1px solid var(--border); box-shadow: 0 -2px 6px rgba(0,0,0,0.05); z-index: 100; }
+        .nav-tab { flex: 1; text-align: center; padding: 14px 0; font-size: 14px; font-weight: bold; color: var(--muted); cursor: pointer; }
+        .nav-tab.active { color: var(--primary); border-top: 3px solid var(--primary); background: #f9fbf9; }
 
-        .add-item-row { display: flex; gap: 10px; margin-bottom: 20px; }
-        .add-item-row input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-        .add-item-row button { padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; }
-        
-        .shopping-item { display: flex; align-items: center; background: var(--surface); padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: 0.2s; }
-        .shopping-item.checked { opacity: 0.6; }
-        .shopping-item.checked .item-name { text-decoration: line-through; }
-        .item-checkbox { width: 24px; height: 24px; margin-right: 15px; accent-color: var(--primary); }
-        .item-name { flex: 1; font-size: 16px; font-weight: 500; }
-        .item-amount { width: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; text-align: center; }
-        
-        .clear-btn { width: 100%; padding: 15px; background: #ff5252; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface); display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-top: 1px solid var(--border); z-index: 100; }
-        .nav-item { flex: 1; padding: 15px; text-align: center; font-size: 16px; font-weight: bold; color: #888; cursor: pointer; }
-        .nav-item.active { color: var(--primary); border-top: 3px solid var(--primary); background: #f0fdf4; }
-
+        /* Modal Wyboru Dania */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: flex-end; }
-        .modal-content { background: var(--surface); width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; }
-        .modal-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-        .close-btn { font-size: 24px; color: #888; cursor: pointer; }
-        .search-bar { padding: 15px; border-bottom: 1px solid var(--border); }
-        .search-bar input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-        .food-list { overflow-y: auto; padding: 10px; flex: 1; }
-        .food-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 16px; }
+        .modal-body { background: var(--surface); width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; }
+        .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-close { font-size: 24px; cursor: pointer; color: var(--muted); border: none; background: none; }
+        .modal-search { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .modal-list { overflow-y: auto; padding: 8px 16px; flex: 1; }
+        .modal-item { padding: 14px 4px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 16px; }
+
+        .seed-box { margin-bottom: 20px; padding: 14px; background: #fff3e0; border-radius: 8px; text-align: center; font-size: 14px; }
+        .btn-seed { margin-top: 8px; padding: 8px 16px; background: #f57c00; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <nav class="navbar" id="topNav">
+
+    <!-- Przełącznik profilu (Planer) -->
+    <header class="top-nav" id="topNav">
         <div class="user-switch">
-            <button id="btn-Wiktor" class="active" onclick="switchUser('Wiktor')">Wiktor</button>
-            <button id="btn-Julia" onclick="switchUser('Julia')">Julia</button>
+            <button id="btn-user-Wiktor" class="active" onclick="switchUser('Wiktor')">Wiktor</button>
+            <button id="btn-user-Julia" onclick="switchUser('Julia')">Julia</button>
         </div>
+    </header>
+
+    <!-- WIDOK 1: PLANER -->
+    <main id="view-plan" class="container active">
+        <div id="plan-cards"></div>
+    </main>
+
+    <!-- WIDOK 2: ZAKUPY -->
+    <main id="view-shop" class="container">
+        <div class="add-row">
+            <input type="text" id="newShopInput" class="input-text" placeholder="Dodaj produkt..." onkeypress="if(event.key==='Enter') addShopItem()">
+            <button class="btn-add" onclick="addShopItem()">Dodaj</button>
+        </div>
+        <div id="shop-list-container"></div>
+        <button class="btn-clear" onclick="clearPurchased()">Usuń odhaczone</button>
+    </main>
+
+    <!-- WIDOK 3: BAZA DAŃ -->
+    <main id="view-baza" class="container">
+        <div id="seed-container" class="seed-box" style="display: none;">
+            Baza jest pusta! Kliknij, aby wgrać swoje 71 dań startowych:
+            <br>
+            <button class="btn-seed" onclick="seedInitialDishes()">Wgraj dania startowe</button>
+        </div>
+
+        <div class="add-row">
+            <input type="text" id="newDishName" class="input-text" placeholder="Nazwa dania...">
+            <input type="text" id="newDishCat" class="input-text" placeholder="Kategoria (opcjonalnie)" style="max-width: 140px;">
+            <button class="btn-add" onclick="addNewDish()">Dodaj</button>
+        </div>
+        <div id="baza-list-container"></div>
+    </main>
+
+    <!-- DOLNY PASEK NAWIGACJI -->
+    <nav class="bottom-nav">
+        <div id="tab-plan" class="nav-tab active" onclick="switchTab('plan')">📅 Planer</div>
+        <div id="tab-shop" class="nav-tab" onclick="switchTab('shop')">🛒 Zakupy</div>
+        <div id="tab-baza" class="nav-tab" onclick="switchTab('baza')">🍲 Baza Dań</div>
     </nav>
-    <div id="loader" class="loader">Ładowanie danych...</div>
-    
-    <div id="plan-view" class="view-container active"></div>
 
-    <div id="shopping-view" class="view-container">
-        <div class="add-item-row">
-            <input type="text" id="newItemInput" placeholder="Dodaj np. Mleko..." onkeypress="handleEnter(event)">
-            <button onclick="addShoppingItem()">Dodaj</button>
-        </div>
-        <div id="shopping-list"></div>
-        <button class="clear-btn" onclick="clearPurchased()">Usuń odhaczone</button>
-    </div>
-
-    <div class="bottom-nav">
-        <div id="nav-plan" class="nav-item active" onclick="switchView('plan')">📅 Planer</div>
-        <div id="nav-shop" class="nav-item" onclick="switchView('shop')">🛒 Zakupy</div>
-    </div>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h3>Wybierz danie</h3><span class="close-btn" onclick="closeModal()">&times;</span></div>
-            <div class="search-bar"><input type="text" id="searchInput" placeholder="Szukaj..." onkeyup="filterBaza()"></div>
-            <div id="foodList" class="food-list"></div>
+    <!-- MODAL WYBORU POSIŁKU -->
+    <div id="foodModal" class="modal">
+        <div class="modal-body">
+            <div class="modal-header">
+                <h3>Wybierz danie</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-search">
+                <input type="text" id="modalSearch" class="input-text" placeholder="Szukaj..." onkeyup="filterModalDishes()">
+            </div>
+            <div class="modal-list" id="modalDishesList"></div>
         </div>
     </div>
 
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyUgUmZBrbj2dlOJEz-oSvHdC8FyKuqHxbE7QydKI6XbnLm5QnLONxAH7EnKo9Txq5sVQ/exec";
-        
+    <!-- Firebase SDK (Modular v10) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, updateDoc, deleteDoc, writeBatch 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjITwMC0x5D9uJWOdBVuz7qL8I23sS6Yo",
+            authDomain: "zakupki-177d6.firebaseapp.com",
+            projectId: "zakupki-177d6",
+            storageBucket: "zakupki-177d6.firebasestorage.app",
+            messagingSenderId: "387440133726",
+            appId: "1:387440133726:web:57e13dcea7c3ae979316cf",
+            measurementId: "G-7CJG7SXP4X"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Zmienne stanu
         let currentUser = 'Wiktor';
-        let bazaDan = [];
-        let shoppingList = [];
-        let currentSelection = { dayIndex: null, mealIndex: null };
-        const dni = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"];
-        const posilki = ["Śniadanie", "Obiad", "Kolacja", "Zachcianka"];
+        let dishes = [];
+        let shoppingItems = [];
+        let currentPlan = {};
+        let activeSelection = { day: null, meal: null };
 
-        async function init() {
-            await fetchBaza();
-            await fetchPlan();
-            await fetchShoppingList();
-        }
+        const DNI = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"];
+        const POSILKI = ["Śniadanie", "Obiad", "Kolacja", "Zachcianka"];
 
-        function switchView(view) {
-            document.getElementById('plan-view').classList.toggle('active', view === 'plan');
-            document.getElementById('shopping-view').classList.toggle('active', view === 'shop');
-            document.getElementById('nav-plan').classList.toggle('active', view === 'plan');
-            document.getElementById('nav-shop').classList.toggle('active', view === 'shop');
-            document.getElementById('topNav').style.display = view === 'plan' ? 'flex' : 'none';
-        }
+        // --- NAWIGACJA ---
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
 
-        function switchUser(user) {
+            document.getElementById(`view-${tab}`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            document.getElementById('topNav').style.display = tab === 'plan' ? 'flex' : 'none';
+        };
+
+        window.switchUser = function(user) {
             currentUser = user;
-            document.getElementById('btn-Wiktor').classList.toggle('active', user === 'Wiktor');
-            document.getElementById('btn-Julia').classList.toggle('active', user === 'Julia');
-            fetchPlan();
+            document.getElementById('btn-user-Wiktor').classList.toggle('active', user === 'Wiktor');
+            document.getElementById('btn-user-Julia').classList.toggle('active', user === 'Julia');
+            listenToPlan();
+        };
+
+        // --- BAZA DAŃ (Firestore Realtime) ---
+        onSnapshot(collection(db, "dishes"), (snapshot) => {
+            dishes = [];
+            snapshot.forEach(d => dishes.push({ id: d.id, ...d.data() }));
+            dishes.sort((a,b) => (a.name || '').localeCompare(b.name || ''));
+            renderBaza();
+
+            // Pokaż przycisk seedowania jeśli baza jest pusta
+            document.getElementById('seed-container').style.display = dishes.length === 0 ? 'block' : 'none';
+        });
+
+        function renderBaza() {
+            const container = document.getElementById('baza-list-container');
+            container.innerHTML = '';
+            dishes.forEach(d => {
+                const item = document.createElement('div');
+                item.className = 'baza-card';
+                item.innerHTML = `
+                    <div>
+                        <div class="baza-name">${d.name}</div>
+                        <div class="baza-cat">${d.category || 'Ogólne'}</div>
+                    </div>
+                    <button class="btn-del" onclick="deleteDish('${d.id}')">&times;</button>
+                `;
+                container.appendChild(item);
+            });
         }
 
-        function showLoader(show) { document.getElementById('loader').style.display = show ? 'block' : 'none'; }
+        window.addNewDish = async function() {
+            const name = document.getElementById('newDishName').value.trim();
+            const cat = document.getElementById('newDishCat').value.trim();
+            if (!name) return;
+            await addDoc(collection(db, "dishes"), { name: name, category: cat || "Inne" });
+            document.getElementById('newDishName').value = '';
+            document.getElementById('newDishCat').value = '';
+        };
 
-        async function fetchBaza() {
-            const res = await fetch(`${API_URL}?action=getBaza`);
-            bazaDan = await res.json();
+        window.deleteDish = async function(id) {
+            if (confirm("Usunąć to danie z bazy?")) {
+                await deleteDoc(doc(db, "dishes", id));
+            }
+        };
+
+        // --- PLANER POSIŁKÓW ---
+        let unsubscribePlan = null;
+        function listenToPlan() {
+            if (unsubscribePlan) unsubscribePlan();
+            unsubscribePlan = onSnapshot(doc(db, "plans", currentUser), (snap) => {
+                currentPlan = snap.exists() ? snap.data() : {};
+                renderPlan();
+            });
         }
+        listenToPlan();
 
-        async function fetchPlan() {
-            showLoader(true);
-            const res = await fetch(`${API_URL}?action=getPlan&user=${currentUser}`);
-            const planData = await res.json();
-            renderPlan(planData);
-            showLoader(false);
-        }
+        function renderPlan() {
+            const container = document.getElementById('plan-cards');
+            container.innerHTML = '';
 
-        function renderPlan(planData) {
-            const planDiv = document.getElementById('plan-view');
-            planDiv.innerHTML = '';
-            dni.forEach((dzien, dIndex) => {
+            DNI.forEach(dzien => {
                 const card = document.createElement('div');
                 card.className = 'day-card';
                 card.innerHTML = `<div class="day-title">${dzien}</div>`;
-                posilki.forEach((posilek, mIndex) => {
-                    const aktualneDanie = planData[mIndex]?.[dIndex] || "+ Wybierz";
-                    const isFilled = aktualneDanie !== "+ Wybierz" && aktualneDanie !== "";
-                    card.innerHTML += `
-                        <div class="meal-row">
-                            <div class="meal-label">${posilek}</div>
-                            <div class="meal-box ${isFilled ? 'filled' : ''}" onclick="openModal(${dIndex}, ${mIndex})">${aktualneDanie}</div>
-                        </div>`;
+
+                POSILKI.forEach(posilek => {
+                    const key = `${dzien}_${posilek}`;
+                    const dish = currentPlan[key] || "+ Wybierz";
+                    const isFilled = dish !== "+ Wybierz";
+
+                    const row = document.createElement('div');
+                    row.className = 'meal-row';
+                    row.innerHTML = `
+                        <div class="meal-label">${posilek}</div>
+                        <div class="meal-box ${isFilled ? 'filled' : ''}" onclick="openFoodModal('${dzien}', '${posilek}')">
+                            ${dish}
+                        </div>
+                    `;
+                    card.appendChild(row);
                 });
-                planDiv.appendChild(card);
+                container.appendChild(card);
             });
         }
 
-        function openModal(dIndex, mIndex) {
-            currentSelection = { dayIndex: dIndex, mealIndex: mIndex };
-            renderBaza(bazaDan);
-            document.getElementById('modal').style.display = 'flex';
-        }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        
-        function renderBaza(dane) {
-            const list = document.getElementById('foodList');
-            list.innerHTML = '';
-            dane.forEach(d => {
-                const item = document.createElement('div');
-                item.className = 'food-item';
-                item.innerText = d.name;
-                item.onclick = () => selectDanie(d.name);
-                list.appendChild(item);
+        window.openFoodModal = function(day, meal) {
+            activeSelection = { day, meal };
+            document.getElementById('modalSearch').value = '';
+            renderModalDishes(dishes);
+            document.getElementById('foodModal').style.display = 'flex';
+        };
+
+        window.closeModal = function() {
+            document.getElementById('foodModal').style.display = 'none';
+        };
+
+        function renderModalDishes(list) {
+            const c = document.getElementById('modalDishesList');
+            c.innerHTML = '<div class="modal-item" style="color: var(--danger);" onclick="selectDishForPlan(\'\')">✕ Usuń danie (puste)</div>';
+            list.forEach(d => {
+                const el = document.createElement('div');
+                el.className = 'modal-item';
+                el.innerText = d.name;
+                el.onclick = () => selectDishForPlan(d.name);
+                c.appendChild(el);
             });
         }
 
-        function filterBaza() {
-            const q = document.getElementById('searchInput').value.toLowerCase();
-            renderBaza(bazaDan.filter(d => d.name.toLowerCase().includes(q)));
-        }
+        window.filterModalDishes = function() {
+            const q = document.getElementById('modalSearch').value.toLowerCase();
+            renderModalDishes(dishes.filter(d => d.name.toLowerCase().includes(q)));
+        };
 
-        async function selectDanie(danieName) {
+        window.selectDishForPlan = async function(dishName) {
             closeModal();
-            const url = `${API_URL}?action=savePlan&user=${currentUser}&dayIndex=${currentSelection.dayIndex}&mealIndex=${currentSelection.mealIndex}&mealName=${encodeURIComponent(danieName)}`;
-            await fetch(url);
-            fetchPlan();
-        }
+            const key = `${activeSelection.day}_${activeSelection.meal}`;
+            await setDoc(doc(db, "plans", currentUser), {
+                [key]: dishName
+            }, { merge: true });
+        };
 
-        // --- ZAKUPY LOGIKA ---
-        async function fetchShoppingList() {
-            const res = await fetch(`${API_URL}?action=getShoppingList`);
-            shoppingList = await res.json();
-            renderShoppingList();
-        }
+        // --- LISTA ZAKUPÓW (Realtime) ---
+        onSnapshot(collection(db, "shopping"), (snapshot) => {
+            shoppingItems = [];
+            snapshot.forEach(d => shoppingItems.push({ id: d.id, ...d.data() }));
+            shoppingItems.sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+            renderShopping();
+        });
 
-        function renderShoppingList() {
-            const listDiv = document.getElementById('shopping-list');
-            listDiv.innerHTML = '';
-            shoppingList.forEach(item => {
-                const row = document.createElement('div');
-                row.className = `shopping-item ${item.status ? 'checked' : ''}`;
-                row.innerHTML = `
-                    <input type="checkbox" class="item-checkbox" ${item.status ? 'checked' : ''} onchange="toggleStatus('${item.id}', this.checked)">
-                    <div class="item-name">${item.name}</div>
-                    <input type="text" class="item-amount" value="${item.amount || ''}" placeholder="Ilość..." onchange="updateAmount('${item.id}', this.value)">
+        function renderShopping() {
+            const c = document.getElementById('shop-list-container');
+            c.innerHTML = '';
+            shoppingItems.forEach(item => {
+                const el = document.createElement('div');
+                el.className = `shop-item ${item.checked ? 'checked' : ''}`;
+                el.innerHTML = `
+                    <input type="checkbox" class="shop-check" ${item.checked ? 'checked' : ''} onchange="toggleShopCheck('${item.id}', this.checked)">
+                    <div class="shop-name">${item.name}</div>
+                    <input type="text" class="shop-amount" value="${item.amount || ''}" placeholder="Ilość..." onchange="updateShopAmount('${item.id}', this.value)">
                 `;
-                listDiv.appendChild(row);
+                c.appendChild(el);
             });
         }
 
-        function handleEnter(e) { if(e.key === 'Enter') addShoppingItem(); }
-
-        async function addShoppingItem() {
-            const input = document.getElementById('newItemInput');
+        window.addShopItem = async function() {
+            const input = document.getElementById('newShopInput');
             const name = input.value.trim();
-            if(!name) return;
-            input.value = ''; 
+            if (!name) return;
+            input.value = '';
+            await addDoc(collection(db, "shopping"), {
+                name: name,
+                amount: "",
+                checked: false,
+                createdAt: Date.now()
+            });
+        };
+
+        window.toggleShopCheck = async function(id, isChecked) {
+            await updateDoc(doc(db, "shopping", id), { checked: isChecked });
+        };
+
+        window.updateShopAmount = async function(id, val) {
+            await updateDoc(doc(db, "shopping", id), { amount: val });
+        };
+
+        window.clearPurchased = async function() {
+            const toDelete = shoppingItems.filter(i => i.checked);
+            for (const item of toDelete) {
+                await deleteDoc(doc(db, "shopping", item.id));
+            }
+        };
+
+        // --- SEED STARTOWYCH DAŃ ---
+        window.seedInitialDishes = async function() {
+            const startDishes = [
+                "Spaghetti", "Kotlet schabowy", "Zupa ogórkowa", "Pizza", "Makaron ryżowy z kurczakiem", 
+                "Makaron z pieczarkami i kurczakiem", "Zupa pomidorowa", "Rosół", "Zupa pieczarkowa", 
+                "Grzanki z serem i szynką", "Zapiekanki", "Burgery", "Klopsiki z sosem pomidorowym", 
+                "Frytki z batatów", "Frytki", "KFC", "Hot-Dog", "Barszcz czerwony", "Barszcz biały", 
+                "Żurek", "Zalewajka", "Tiramisu", "Deser z herbatnikami", "Catering", "Zamawiane", 
+                "Kotlet mielone", "Zupa koperkowa", "Sos mięsny", "Karczek z serem i cebulą", 
+                "Karczek BBQ", "Udka z kurczaka", "Pity z kurczakiem", "Ryba smażona", "Łosoś pieczony", 
+                "Zupa gulaszowa", "Leczo", "Zupa meksykańska", "Kurczak słodko-kwasny", 
+                "Kurczak w słodkim sosie sojowym", "Bowl", "Zupa szczawiowa", "Zapiekanka makaronowa", 
+                "Pancake", "Chleb bananowy", "Babeczki", "Placki ziemniaczane", "Jajecznica", 
+                "Jajka na miękko", "Jajka na twardo", "Szakszuka", "Kluski śląskie", "Kopytka", 
+                "Pierogi", "Bigos", "Kotlet de vollaille", "Krupnik", "Lasagne", "Makaron Udon", 
+                "Wrapy", "Krewetki", "Tarta z owocami", "Gofry", "Naleśniki", "Zupa kalafiorowa", 
+                "Wątróbka", "Kebab domowy", "Ryż smażony po chińsku", "Omlety", "Owoce pod kruszonką", 
+                "Ziemniaki", "Ryż"
+            ];
             
-            const url = `${API_URL}?action=addShoppingItem&name=${encodeURIComponent(name)}`;
-            await fetch(url);
-            fetchShoppingList();
-        }
+            const batch = writeBatch(db);
+            startDishes.forEach(name => {
+                const docRef = doc(collection(db, "dishes"));
+                batch.set(docRef, { name: name, category: "Danie główne" });
+            });
+            await batch.commit();
+            alert("Dodano początkowe dania do bazy!");
+        };
 
-        async function toggleStatus(id, isChecked) {
-            const item = shoppingList.find(i => i.id == id);
-            if(item) item.status = isChecked;
-            renderShoppingList();
-            
-            const url = `${API_URL}?action=updateShoppingItem&id=${id}&field=status&value=${isChecked}`;
-            await fetch(url);
-        }
-
-        async function updateAmount(id, newAmount) {
-            const url = `${API_URL}?action=updateShoppingItem&id=${id}&field=amount&value=${encodeURIComponent(newAmount)}`;
-            await fetch(url);
-        }
-
-        async function clearPurchased() {
-            const url = `${API_URL}?action=clearPurchased`;
-            await fetch(url);
-            fetchShoppingList();
-        }
-
-        init();
+        window.onclick = function(e) {
+            if (e.target === document.getElementById('foodModal')) closeModal();
+        };
     </script>
 </body>
 </html>
