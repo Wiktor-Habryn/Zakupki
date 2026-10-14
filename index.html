@@ -17,6 +17,8 @@
   try {
     var theme = localStorage.getItem('zakupki_theme') || 'auto';
     document.documentElement.setAttribute('data-theme', theme);
+    var user = localStorage.getItem('zakupki_user') || 'Wiktor';
+    document.documentElement.setAttribute('data-user', user);
   } catch(e) {}
 })();
 </script>
@@ -30,6 +32,9 @@
   --border:#e5e5ea; --seg-bg:#e3e3e8; --nav-bg:rgba(255,255,255,.9);
   --shadow:0 2px 8px rgba(0,0,0,.05);
   --card-border:transparent;
+}
+:root[data-user="Julia"] {
+  --bg:#fff0f5;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -54,17 +59,20 @@
   --card-border:#2c2c2e;
 }
 * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif; -webkit-tap-highlight-color:transparent; }
+
 html { -webkit-text-size-adjust:100%; }
 body { background:var(--bg); color:var(--text); padding-bottom:calc(90px + env(safe-area-inset-bottom)); overscroll-behavior-y:none; transition: background-color 0.3s; }
 button { font:inherit; color:inherit; cursor:pointer; border:none; background:none; }
 button:active, .pressable:active { transform:scale(.97); }
 button, .pressable { transition:transform .12s ease, background .2s, opacity .2s; }
-.top-nav { background:var(--bg); padding:calc(10px + env(safe-area-inset-top)) 16px 8px; position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; }
+.top-nav { background:var(--bg); padding:calc(10px + env(safe-area-inset-top)) 16px 8px; position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; transition: background-color 0.3s; }
 .top-title { font-size:28px; font-weight:800; letter-spacing:-.5px; }
 .header-actions { display:flex; gap:12px; align-items:center; }
 .avatars { display:flex; gap:8px; }
 .avatar { width:36px; height:36px; border-radius:50%; background:var(--seg-bg); color:var(--muted); font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; border:2px solid transparent; }
 .avatar.active { background:var(--primary); color:#fff; border-color:var(--primary-bg); }
+#avatar-Julia { background:#ffd6e7; color:#a63a69; }
+#avatar-Julia.active { background:#ff85b3; color:#ffffff; border-color:#ffd6e7; }
 .theme-btn { width:36px; height:36px; font-size:18px; display:flex; justify-content:center; align-items:center; background:var(--surface); border-radius:18px; box-shadow:var(--shadow); border:1px solid var(--card-border); }
 .container { display:none; padding:8px 16px 16px; max-width:600px; margin:0 auto; animation:fadeIn .3s ease; }
 .container.active { display:block; }
@@ -101,7 +109,7 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 .shop-item.checked .shop-name { text-decoration:line-through; color:var(--muted); }
 .shop-check { width:24px; height:24px; accent-color:var(--primary); flex-shrink:0; }
 .shop-name { flex:1; font-size:16px; font-weight:500; min-width:0; overflow-wrap:anywhere; }
-.shop-amount { width:70px; padding:6px 8px; border:none; border-radius:20px; font-size:13px; color:var(--muted); text-align:center; background:var(--bg); outline:none; }
+.shop-amount { width:75px; padding:6px 8px; border:none; border-radius:20px; font-size:13px; color:var(--muted); text-align:center; background:var(--bg); outline:none; flex-shrink:0; }
 .shop-amount:focus { background:var(--primary-bg); color:var(--primary); }
 .shop-del { width:28px; height:28px; font-size:20px; color:var(--muted); border-radius:14px; line-height:1; }
 .empty-state { text-align:center; padding:48px 20px; color:var(--muted); }
@@ -395,7 +403,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = s => String(s ?? '').trim().toLowerCase();
 const DNI = ["Poniedziałek","Wtorek","Środa","Czwartek","Piątek"];
-const POSILKI = ["Śniadanie","Obiad","Kolacja","Zachcianka"];
+const POSILKI = ["Śniadanie","Obiad","Kolacja","Dodatek"];
 const TITLES = { plan:'Planer', shop:'Zakupy', baza:'Baza dań' };
 
 const store = {
@@ -486,6 +494,7 @@ function switchUser(user) {
 }
 function updateAvatars() {
   $('avatar-Wiktor').classList.toggle('active', currentUser === 'Wiktor');$('avatar-Julia').classList.toggle('active', currentUser === 'Julia');
+  document.documentElement.setAttribute('data-user', currentUser);
 }
 
 /* ---------- Składniki ---------- */
@@ -493,6 +502,15 @@ function parseIng(str) {
   if (!str) return [];
   const sep = /[\n;]/.test(str) ? /[\n;]+/ : /,/;
   return str.split(sep).map(s => s.trim()).filter(Boolean);
+}
+function splitIngAmount(raw) {
+  const s = String(raw ?? '').trim();
+  // Wykrywa np. "Makaron 500 g", "Mąka 1,5 kg", "Mleko 2 l" (nie rusza "Śmietana 18%" ani "30%")
+  const m = s.match(/^(.+?)\s+(\d+(?:[.,]\d+)?\s*(?:g|dag|kg|ml|l|szt\.?|sztuk|opak\.?|op\.?|pęczek|pęczki|puszka|puszki|ząbek|ząbki|łyżk[ai]|łyżeczk[ai]|szklank[ai])?)$/i);
+  if (m && !m[2].includes('%')) {
+    return { name: m[1].trim(), amount: m[2].trim() };
+  }
+  return { name: s, amount: '' };
 }
 function dedupe(list) {
   const seen = new Set(), out = [];
@@ -529,7 +547,6 @@ function renderBaza() {
   const q = norm($('bazaSearch').value);
   const list = dishes.filter(d => norm(d.name).includes(q) && (!activeCat || d.category === activeCat));
 
-  // Ukrywamy przycisk automatycznego generowania, jeśli wszystkie dania mają składniki (lub przynajmniej te znane ze słownika)
   let needsUpdate = false;
   dishes.forEach(d => {
     if ((!d.ingredients || d.ingredients.trim() === '') && autoIngredients[d.name]) needsUpdate = true;
@@ -665,13 +682,15 @@ function exportPlanIngredients() {
 function openIngredientModal(list) {
   const onList = new Set(shoppingItems.filter(i => !i.checked).map(i => norm(i.name)));
   $('ingredientModalList').innerHTML = list.map((ing, i) => {
-    const exists = onList.has(norm(ing));
+    const parsed = splitIngAmount(ing);
+    const exists = onList.has(norm(parsed.name)) || onList.has(norm(ing));
     return `
       <div class="shop-item" style="margin-bottom:6px;">
-        <input type="checkbox" class="shop-check ing-export-checkbox" id="exp_${i}" data-name="${esc(ing)}" ${exists ? '' : 'checked'}>
-        <label class="shop-name" for="exp_${i}" style="cursor:pointer;">${esc(ing)}
+        <input type="checkbox" class="shop-check ing-export-checkbox" id="exp_${i}" data-name="${esc(parsed.name)}" ${exists ? '' : 'checked'}>
+        <label class="shop-name" for="exp_${i}" style="cursor:pointer;">${esc(parsed.name)}
           ${exists ? '<span style="font-size:12px;color:var(--muted);display:block;">już na liście</span>' : ''}
         </label>
+        <input type="text" class="shop-amount ing-export-amount" value="${esc(parsed.amount)}" placeholder="ilość" aria-label="Ilość dla ${esc(parsed.name)}">
       </div>`;
   }).join('');
   openModal('ingredientModal');
@@ -681,14 +700,26 @@ function confirmAddIngredients() {
   const checked = [...document.querySelectorAll('.ing-export-checkbox:checked')];
   if (!checked.length) return toast('Nie wybrano składników');
   const onList = new Set(shoppingItems.filter(i => !i.checked).map(i => norm(i.name)));
-  const names = checked.map(cb => cb.dataset.name).filter(n => !onList.has(norm(n)));
-  if (!names.length) { closeModal('ingredientModal'); return toast('Wszystko już jest na liście'); }
+  
+  const itemsToAdd = [];
+  checked.forEach(cb => {
+    const name = cb.dataset.name;
+    const row = cb.closest('.shop-item');
+    const amountInput = row ? row.querySelector('.ing-export-amount') : null;
+    const amount = amountInput ? amountInput.value.trim() : '';
+    if (!onList.has(norm(name))) {
+      onList.add(norm(name));
+      itemsToAdd.push({ name, amount });
+    }
+  });
+
+  if (!itemsToAdd.length) { closeModal('ingredientModal'); return toast('Wszystko już jest na liście'); }
   const batch = writeBatch(db);
   const now = Date.now();
-  names.forEach((name, i) => batch.set(doc(collection(db, "shopping")), { name, amount:"", checked:false, createdAt: now + i }));
+  itemsToAdd.forEach((item, i) => batch.set(doc(collection(db, "shopping")), { name: item.name, amount: item.amount, checked:false, createdAt: now + i }));
   safe(batch.commit());
   closeModal('ingredientModal');
-  toast(`Dodano ${names.length} ${names.length === 1 ? 'produkt' : 'produkty/ów'}`);
+  toast(`Dodano ${itemsToAdd.length} ${itemsToAdd.length === 1 ? 'produkt' : 'produkty/ów'}`);
   switchTab('shop');
 }
 
@@ -701,6 +732,10 @@ function listenToPlan() {
     loaded.plan = true;
     renderPlan();
   }, err => { console.error(err); toast('Brak dostępu do planu'); });
+}
+
+function getPlanVal(dzien, posilek) {
+  return currentPlan[`${dzien}_${posilek}`] ?? (posilek === 'Dodatek' ? currentPlan[`${dzien}_Zachcianka`] : undefined);
 }
 
 function resolveDish(val) {
@@ -726,7 +761,7 @@ function renderPlan() {
   container.innerHTML = DNI.map((dzien, i) => {
     const cls = i === today ? 'today' : '';
     const rows = POSILKI.map(posilek => {
-      const val = currentPlan[`${dzien}_${posilek}`];
+      const val = getPlanVal(dzien, posilek);
       const filled = !!val;
       return `
         <div class="meal-row">
@@ -756,19 +791,23 @@ function clearDay(day) {
   if (!confirm(`Wyczyścić plan na ${day}?`)) return;
   const updates = {};
   POSILKI.forEach(m => { updates[`${day}_${m}`] = deleteField(); });
+  updates[`${day}_Zachcianka`] = deleteField();
   safe(setDoc(doc(db, "plans", currentUser), updates, { merge:true }));
 }
 function clearWeek() {
   if (!confirm(`Wyczyścić cały tydzień dla: ${currentUser}?`)) return;
   const updates = {};
-  DNI.forEach(day => POSILKI.forEach(m => { updates[`${day}_${m}`] = deleteField(); }));
+  DNI.forEach(day => {
+    POSILKI.forEach(m => { updates[`${day}_${m}`] = deleteField(); });
+    updates[`${day}_Zachcianka`] = deleteField();
+  });
   safe(setDoc(doc(db, "plans", currentUser), updates, { merge:true }));
 }
 
 function openFoodModal(day, meal) {
   activeSelection = { day, meal };
   $('foodModalTitle').textContent = `${day} · ${meal}`;
-  const current = resolveDish(currentPlan[`${day}_${meal}`]);
+  const current = resolveDish(getPlanVal(day, meal));
   const extra = $('foodModalExtra');
   if (current) {
     extra.innerHTML = `<button class="btn-large btn-success" style="margin:0;" data-act="cook" data-id="${esc(current.id)}">👨‍🍳 Gotuj: ${esc(current.name)}</button>`;
@@ -782,7 +821,7 @@ function openFoodModal(day, meal) {
 function filterModalDishes() {
   const q = norm($('modalSearch').value);
   const list = dishes.filter(d => norm(d.name).includes(q));
-  const hasCurrent = !!currentPlan[`${activeSelection.day}_${activeSelection.meal}`];
+  const hasCurrent = !!getPlanVal(activeSelection.day, activeSelection.meal);
   $('modalDishesList').innerHTML =
     (hasCurrent ? '<button class="modal-item" style="color:var(--danger);text-align:center;" data-act="pick-dish" data-id="">Wyczyść to pole</button>' : '') +
     (list.length
@@ -793,7 +832,11 @@ function filterModalDishes() {
 function selectDishForPlan(id) {
   closeModal('foodModal');
   const key = `${activeSelection.day}_${activeSelection.meal}`;
-  safe(setDoc(doc(db, "plans", currentUser), { [key]: id ? id : deleteField() }, { merge:true }));
+  const updates = { [key]: id ? id : deleteField() };
+  if (activeSelection.meal === 'Dodatek') {
+    updates[`${activeSelection.day}_Zachcianka`] = deleteField();
+  }
+  safe(setDoc(doc(db, "plans", currentUser), updates, { merge:true }));
 }
 
 /* ---------- Zakupy ---------- */
@@ -968,7 +1011,7 @@ document.addEventListener('change', e => {
   if (t.classList.contains('shop-check') && t.dataset.id) {
     vibrate(10);
     safe(updateDoc(doc(db, "shopping", t.dataset.id), { checked: t.checked }));
-  } else if (t.classList.contains('shop-amount')) {
+  } else if (t.classList.contains('shop-amount') && t.dataset.id) {
     safe(updateDoc(doc(db, "shopping", t.dataset.id), { amount: t.value.trim() }));
   }
 });
