@@ -206,7 +206,63 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 </style>
 </head>
 <body>
+<!-- EKRAN BLOKADY PIN -->
+<div id="pin-lock-screen" style="position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;">
+  <div id="pin-box" style="background:var(--surface);padding:32px 24px;border-radius:24px;box-shadow:var(--shadow);border:1px solid var(--border);width:100%;max-width:320px;">
+    <div style="font-size:52px;margin-bottom:12px;">🔒</div>
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:6px;">Zakupki</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:20px;">Podaj kod dostępu, aby wejść</p>
+    <input type="password" id="pin-input" class="input-styled" style="width:100%;text-align:center;font-size:22px;letter-spacing:6px;margin-bottom:12px;" placeholder="••••" autocomplete="off">
+    <div id="pin-error" style="color:var(--danger);font-size:13px;font-weight:600;margin-bottom:12px;display:none;">Nieprawidłowy kod! Spróbuj ponownie.</div>
+    <button type="button" id="pin-submit" class="btn-large btn-primary">Odblokuj</button>
+  </div>
+</div>
+<script>
+(function() {
+  // 👇 TUTAJ WPISZ WASZ TAJNY KOD PIN LUB HASŁO 👇
+  var SECRET_PIN = "1609"; 
+  var STORAGE_KEY = "zakupki_unlocked_" + SECRET_PIN;
 
+  var screen = document.getElementById('pin-lock-screen');
+  var input = document.getElementById('pin-input');
+  var btn = document.getElementById('pin-submit');
+  var err = document.getElementById('pin-error');
+  var box = document.getElementById('pin-box');
+
+  try {
+    if (localStorage.getItem(STORAGE_KEY) === 'true') {
+      screen.remove();
+      return;
+    }
+  } catch(e) {}
+
+  function checkPin() {
+    if (input.value.trim() === SECRET_PIN) {
+      try { localStorage.setItem(STORAGE_KEY, 'true'); } catch(e) {}
+      screen.style.transition = 'opacity 0.25s ease';
+      screen.style.opacity = '0';
+      setTimeout(function() { screen.remove(); }, 250);
+    } else {
+      err.style.display = 'block';
+      input.value = '';
+      input.focus();
+      box.animate([
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(-10px)' },
+        { transform: 'translateX(10px)' },
+        { transform: 'translateX(-6px)' },
+        { transform: 'translateX(6px)' },
+        { transform: 'translateX(0)' }
+      ], { duration: 300 });
+    }
+  }
+
+  btn.addEventListener('click', checkPin);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkPin();
+  });
+})();
+</script>
 <header class="top-nav">
   <div class="top-title" id="topTitle">Planer</div>
   <div class="header-actions">
