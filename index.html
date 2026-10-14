@@ -237,6 +237,14 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
   <button id="btn-clear-all-shop" class="btn-large btn-danger" style="margin-bottom:14px;padding:11px;display:none;" data-act="clear-all-shop">
     🧹 Wyczyść całą listę zakupów
   </button>
+
+  <!-- WKLEJ TEN BLOK TUTAJ: -->
+  <div class="seg-control" id="shop-sort-bar" style="margin-bottom:14px;display:none;">
+    <button class="seg-btn active" data-act="shop-sort" data-sort="added">🕒 Kolejność</button>
+    <button class="seg-btn" data-act="shop-sort" data-sort="name">🔤 Nazwa A-Z</button>
+    <button class="seg-btn" data-act="shop-sort" data-sort="category">🏷️ Kategorie</button>
+  </div>
+
   <div id="shop-list-container"></div>
 </main>
 
@@ -614,6 +622,7 @@ let activeSelection = { day:null, meal:null };
 let activeCat = '', activeIngCat = '';
 let bazaMode = 'dishes'; // 'dishes' | 'ingredients'
 let showDone = false;
+let shopSort = store.get('zakupki_shop_sort', 'added'); // 'added' | 'name' | 'category'
 let wakeLock = null, cookingOpen = false;
 let loaded = { dishes:false, ingredients:false, shop:false, plan:false };
 let pendingShopRender = false;
@@ -1358,6 +1367,24 @@ function shopItemHTML(item) {
     </div>`;
 }
 
+function getItemCategory(name) {
+  const n = norm(name);
+  if (!n) return 'Inne / Bez kategorii';
+  // 1. Dokładne dopasowanie w bazie Firebase
+  const exact = ingredientsCatalog.find(i => norm(i.name) === n);
+  if (exact && exact.category) return exact.category;
+  // 2. Dokładne lub częściowe dopasowanie w domyślnym katalogu 220+ składników
+  for (const [cat, items] of Object.entries(DEFAULT_INGREDIENTS_CATALOG)) {
+    if (items.some(item => norm(item) === n || norm(item).startsWith(n + ' ') || norm(item).includes(n))) {
+      return cat;
+    }
+  }
+  // 3. Częściowe dopasowanie w bazie Firebase
+  const partial = ingredientsCatalog.find(i => norm(i.name).includes(n) || n.includes(norm(i.name)));
+  if (partial && partial.category) return partial.category;
+  return 'Inne / Bez kategorii';
+}
+
 function renderShopping() {
   const todo = shoppingItems.filter(i => !i.checked);
   const done = shoppingItems.filter(i => i.checked);
@@ -1367,6 +1394,14 @@ function renderShopping() {
   badge.classList.toggle('show', todo.length > 0);
 
   $('btn-clear-all-shop').style.display = shoppingItems.length > 0 ? 'flex' : 'none';
+  
+  const sortBar = $('shop-sort-bar');
+  if (sortBar) {
+    sortBar.style.display = shoppingItems.length > 0 ? 'flex' : 'none';
+    sortBar.querySelectorAll('.seg-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.sort === shopSort);
+    });
+  }
 
   if (document.activeElement && document.activeElement.classList.contains('shop-amount')) { pendingShopRender = true; return; }
   pendingShopRender = false;
@@ -1379,12 +1414,40 @@ function renderShopping() {
   }
 
   let html = `<div class="section-head"><span>Do kupienia · ${todo.length}</span></div>`;
-  html += todo.length ? todo.map(shopItemHTML).join('') : `<div class="empty-state" style="padding:24px;"><div class="big" style="font-size:40px;">✅</div><div class="s">Wszystko w koszyku!</div></div>`;
+  
+  if (!todo.length) {
+    html += `<div class="empty-state" style="padding:24px;"><div class="big" style="font-size:40px;">✅</div><div class="s">Wszystko w koszyku!</div></div>`;
+  } else if (shopSort === 'name') {
+    const sorted = [...todo].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pl'));
+    html += sorted.map(shopItemHTML).join('');
+  } else if (shopSort === 'category') {
+    const groups = {};
+    todo.forEach(item => {
+      const cat = getItemCategory(item.name);
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(item);
+    });
+    const catKeys = Object.keys(groups).sort((a, b) => {
+      if (a === 'Inne / Bez kategorii') return 1;
+      if (b === 'Inne / Bez kategorii') return -1;
+      return a.localeCompare(b, 'pl');
+    });
+    catKeys.forEach(cat => {
+      groups[cat].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pl'));
+      html += `<div class="section-head" style="margin-top:14px;color:var(--primary);font-size:12px;"><span>🏷️ ${esc(cat)} · ${groups[cat].length}</span></div>`;
+      html += groups[cat].map(shopItemHTML).join('');
+    });
+  } else {
+    html += todo.map(shopItemHTML).join('');
+  }
 
   if (done.length) {
+    const doneSorted = shopSort === 'name'
+      ? [...done].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pl'))
+      : done;
     html += `<button class="section-head section-toggle" data-act="toggle-done" style="margin-top:18px;"><span>W koszyku · ${done.length}</span><span>${showDone ? '▾' : '▸'}</span></button>`;
     if (showDone) {
-      html += done.map(shopItemHTML).join('');
+      html += doneSorted.map(shopItemHTML).join('');
       html += `<button class="btn-large btn-danger" style="margin-top:12px;" data-act="clear-purchased">🗑 Usuń odhaczone</button>`;
     }
   }
@@ -1508,6 +1571,11 @@ const actions = {
   'toggle-done': () => { showDone = !showDone; renderShopping(); },
   'clear-purchased': () => clearPurchased(),
   'clear-all-shop': () => clearAllShopping(),
+  'shop-sort': el => {
+    shopSort = el.dataset.sort;
+    store.set('zakupki_shop_sort', shopSort);
+    renderShopping();
+  },
   cat: el => { activeCat = el.dataset.cat; renderBaza(); },
   'ing-cat': el => { activeIngCat = el.dataset.cat; renderIngredientsBaza(); },
   'new-dish': () => openDishEditor(),
