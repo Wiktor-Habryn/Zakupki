@@ -325,8 +325,9 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
         <label class="form-label" for="editDishCatSelect">Kategoria dania</label>
         <div class="cat-row">
           <select id="editDishCatSelect" class="input-styled"></select>
-          <button type="button" class="cat-btn-sm" data-act="toggle-new-dish-cat">➕ Nowa</button>
-          <button type="button" class="cat-btn-sm del" data-act="delete-dish-cat">🗑 Usuń kat.</button>
+          <button type="button" class="cat-btn-sm" data-act="toggle-new-dish-cat" title="Nowa kategoria">➕</button>
+          <button type="button" class="cat-btn-sm" data-act="rename-dish-cat" title="Zmień nazwę kategorii">✏️</button>
+          <button type="button" class="cat-btn-sm del" data-act="delete-dish-cat" title="Usuń kategorię">🗑</button>
         </div>
         <input type="text" id="editDishCatNew" class="input-styled" style="width:100%;margin-top:8px;display:none;" placeholder="Wpisz nową kategorię dania…">
       </div>
@@ -360,8 +361,9 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
         <label class="form-label" for="editIngDbCatSelect">Kategoria składnika</label>
         <div class="cat-row">
           <select id="editIngDbCatSelect" class="input-styled"></select>
-          <button type="button" class="cat-btn-sm" data-act="toggle-new-ing-cat">➕ Nowa</button>
-          <button type="button" class="cat-btn-sm del" data-act="delete-ing-cat">🗑 Usuń kat.</button>
+          <button type="button" class="cat-btn-sm" data-act="toggle-new-ing-cat" title="Nowa kategoria">➕</button>
+          <button type="button" class="cat-btn-sm" data-act="rename-ing-cat" title="Zmień nazwę kategorii">✏️</button>
+          <button type="button" class="cat-btn-sm del" data-act="delete-ing-cat" title="Usuń kategorię">🗑</button>
         </div>
         <input type="text" id="editIngDbCatNew" class="input-styled" style="width:100%;margin-top:8px;display:none;" placeholder="Wpisz nową kategorię składnika…">
       </div>
@@ -865,6 +867,56 @@ async function deleteCategory(type) {
   toast(`Usunięto kategorię: ${cat}`);
 }
 
+async function renameCategory(type) {
+  const selectEl = type === 'dish' ? $('editDishCatSelect') :$('editIngDbCatSelect');
+  const oldCat = selectEl.value;
+  if (!oldCat) return toast('Wybierz najpierw kategorię z listy, aby zmienić jej nazwę');
+
+  const rawNew = prompt(`Podaj nową nazwę dla kategorii „${oldCat}":`, oldCat);
+  if (rawNew === null) return;
+  const newCat = rawNew.trim();
+  if (!newCat || newCat === oldCat) return;
+
+  const batch = writeBatch(db);
+  let updatedCount = 0;
+
+  if (type === 'dish') {
+    const idx = DEFAULT_DISH_CATEGORIES.indexOf(oldCat);
+    if (idx > -1) DEFAULT_DISH_CATEGORIES.splice(idx, 1);
+
+    customCategories.dish = [...new Set([...customCategories.dish.filter(c => c !== oldCat), newCat])];
+    batch.set(doc(db, "settings", "categories"), { dish: customCategories.dish }, { merge: true });
+
+    dishes.filter(d => d.category === oldCat).forEach(d => {
+      batch.update(doc(db, "dishes", d.id), { category: newCat });
+      updatedCount++;
+    });
+    if (activeCat === oldCat) activeCat = newCat;
+  } else {
+    if (DEFAULT_INGREDIENTS_CATALOG[oldCat]) {
+      DEFAULT_INGREDIENTS_CATALOG[newCat] = [
+        ...(DEFAULT_INGREDIENTS_CATALOG[newCat] || []),
+        ...DEFAULT_INGREDIENTS_CATALOG[oldCat]
+      ];
+      delete DEFAULT_INGREDIENTS_CATALOG[oldCat];
+    }
+
+    customCategories.ing = [...new Set([...customCategories.ing.filter(c => c !== oldCat), newCat])];
+    batch.set(doc(db, "settings", "categories"), { ing: customCategories.ing }, { merge: true });
+
+    ingredientsCatalog.filter(i => i.category === oldCat).forEach(i => {
+      batch.update(doc(db, "ingredients_catalog", i.id), { category: newCat });
+      updatedCount++;
+    });
+    if (activeIngCat === oldCat) activeIngCat = newCat;
+  }
+
+  await safe(batch.commit());
+  updateCategorySelects(type === 'dish' ? newCat : null, type === 'ing' ? newCat : null);
+  renderShopping();
+  toast(`Zmieniono na „${newCat}" (zaktualizowano: ${updatedCount} poz.)`);
+}
+  
 /* ---------- Baza dań ---------- */
 onSnapshot(collection(db, "dishes"), snap => {
   dishes = [];
@@ -1509,7 +1561,6 @@ function clearAllShopping() {
   }});
 }
 
-/* ---------- Obsługa zdarzeń (delegacja) ---------- */
 const actions = {
   tab: el => switchTab(el.dataset.tab),
   'baza-mode': el => switchBazaMode(el.dataset.mode),
@@ -1590,6 +1641,7 @@ const actions = {
     inp.style.display = show ? 'block' : 'none';
     if (show) inp.focus();
   },
+  'rename-dish-cat': () => renameCategory('dish'),
   'delete-dish-cat': () => deleteCategory('dish'),
   'append-ing-to-dish': el => {
     const area = $('editDishIng');
@@ -1607,6 +1659,7 @@ const actions = {
     inp.style.display = show ? 'block' : 'none';
     if (show) inp.focus();
   },
+  'rename-ing-cat': () => renameCategory('ing'),
   'delete-ing-cat': () => deleteCategory('ing'),
   'ing-all': () => document.querySelectorAll('.ing-export-checkbox').forEach(cb => cb.checked = true),
   'ing-none': () => document.querySelectorAll('.ing-export-checkbox').forEach(cb => cb.checked = false),
