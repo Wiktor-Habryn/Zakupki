@@ -170,6 +170,14 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 .skeleton.sm { height:52px; border-radius:12px; margin-bottom:8px; }
 @keyframes shimmer { to { background-position:-200% 0; } }
 @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+
+@keyframes flyDog {
+  0% { transform: translateX(-60px) translateY(0) rotate(0deg); }
+  33% { transform: translateX(35vw) translateY(-15px) rotate(4deg); }
+  66% { transform: translateX(70vw) translateY(15px) rotate(-4deg); }
+  100% { transform: translateX(calc(100vw + 80px)) translateY(0) rotate(0deg); }
+}    
+  
 </style>
 </head>
 <body>
@@ -488,6 +496,7 @@ function switchUser(user) {
   currentUser = user;
   store.set('zakupki_user', user);
   updateAvatars();
+  manageDachshunds();
   loaded.plan = false;
   renderPlan();
   listenToPlan();
@@ -1021,10 +1030,54 @@ $('bazaSearch').addEventListener('input', renderBaza);$('modalSearch').addEventL
 
 /* ---------- Start ---------- */
 updateAvatars();
+manageDachshunds();
 renderPlan();
 renderBaza();
 renderShopping();
 listenToPlan();
+
+/* ---------- Jamniki w tle dla Julii ---------- */
+let dachshundInterval = null;
+
+function manageDachshunds() {
+  const existing = document.getElementById('dachshund-layer');
+  if (currentUser === 'Julia') {
+    if (!existing) {
+      const layer = document.createElement('div');
+      layer.id = 'dachshund-layer';
+      layer.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:99; overflow:hidden;';
+      document.body.appendChild(layer);
+    }
+    if (!dachshundInterval) {
+      dachshundInterval = setInterval(spawnDachshund, 2800);
+      spawnDachshund(); // od razu jeden na start
+    }
+  } else {
+    if (dachshundInterval) { clearInterval(dachshundInterval); dachshundInterval = null; }
+    if (existing) existing.remove();
+  }
+}
+
+function spawnDachshund() {
+  if (currentUser !== 'Julia') return;
+  const layer = document.getElementById('dachshund-layer');
+  if (!layer) return;
+  const dog = document.createElement('div');
+  dog.textContent = '🐕';
+  const topPos = Math.random() * 80 + 10; // pozycja pionowa od 10% do 90%
+  const duration = Math.random() * 4 + 6; // czas przelotu 6-10 sekund
+  dog.style.cssText = `
+    position: absolute;
+    top: ${topPos}%;
+    left: -60px;
+    font-size: ${Math.random() * 14 + 26}px;
+    animation: flyDog ${duration}s linear forwards;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  `;
+  layer.appendChild(dog);
+  setTimeout(() => dog.remove(), duration * 1000);
+}
+  
 </script>
 </body>
 </html>
