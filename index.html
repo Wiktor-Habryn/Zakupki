@@ -76,18 +76,34 @@ button, .pressable { transition:transform .12s ease, background .2s, opacity .2s
 .theme-btn { width:36px; height:36px; font-size:18px; display:flex; justify-content:center; align-items:center; background:var(--surface); border-radius:18px; box-shadow:var(--shadow); border:1px solid var(--card-border); }
 .container { display:none; padding:8px 16px 16px; max-width:600px; margin:0 auto; animation:fadeIn .3s ease; }
 .container.active { display:block; }
+.subview { display:none; animation:fadeIn .28s ease; }
+.subview.active { display:block; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+
+/* Przełącznik segmentowy (Dania / Składniki) */
+.seg-control { display:flex; background:var(--seg-bg); padding:3px; border-radius:12px; margin-bottom:14px; }
+.seg-btn { flex:1; padding:8px 12px; border-radius:9px; font-size:14px; font-weight:600; color:var(--muted); text-align:center; transition:background .2s, color .2s, box-shadow .2s; }
+.seg-btn.active { background:var(--surface); color:var(--text); box-shadow:0 2px 6px rgba(0,0,0,.08); }
+
 .card { background:var(--surface); border-radius:16px; margin-bottom:14px; padding:14px 16px 16px; box-shadow:var(--shadow); border:1px solid var(--card-border); transition:opacity .3s; }
 .card.today { border:2px solid var(--primary); }
 .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .card-title { font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px; }
 .badge-today { font-size:11px; font-weight:700; background:var(--primary); color:#fff; padding:3px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:.5px; }
 .btn-icon { background:var(--bg); width:32px; height:32px; border-radius:16px; display:flex; justify-content:center; align-items:center; font-size:14px; }
-.meal-row { display:flex; align-items:center; margin-bottom:8px; }
+
+/* Wiersze posiłków z obsługą wielu dań */
+.meal-row { display:flex; align-items:flex-start; margin-bottom:10px; }
 .meal-row:last-child { margin-bottom:0; }
-.meal-label { width:92px; font-size:13px; font-weight:600; color:var(--muted); flex-shrink:0; }
-.meal-box { flex:1; text-align:left; padding:11px 14px; border-radius:12px; font-size:15px; font-weight:600; background:var(--primary-bg); color:var(--primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.meal-box.empty { background:transparent; border:1.5px dashed var(--border); color:var(--muted); font-weight:500; padding:9px 14px; }
+.meal-label { width:92px; padding-top:10px; font-size:13px; font-weight:600; color:var(--muted); flex-shrink:0; }
+.meal-items-col { flex:1; display:flex; flex-direction:column; gap:6px; min-width:0; }
+.meal-pill { display:flex; align-items:center; background:var(--primary-bg); color:var(--primary); border-radius:12px; padding:4px 6px 4px 12px; gap:6px; animation:fadeIn .2s ease; }
+.meal-pill-name { flex:1; text-align:left; font-size:15px; font-weight:600; padding:6px 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.meal-pill-del { width:28px; height:28px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:var(--primary); opacity:.75; flex-shrink:0; }
+.meal-pill-del:hover, .meal-pill-del:active { opacity:1; background:rgba(0,0,0,.06); }
+.meal-box { width:100%; text-align:left; padding:11px 14px; border-radius:12px; font-size:15px; font-weight:600; background:var(--primary-bg); color:var(--primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.meal-box.empty { background:transparent; border:1.5px dashed var(--border); color:var(--muted); font-weight:500; padding:8px 14px; font-size:14px; }
+
 .plan-actions-top { display:flex; gap:8px; margin-bottom:14px; }
 .btn-large { width:100%; padding:14px; border-radius:12px; font-size:15px; font-weight:600; display:flex; justify-content:center; align-items:center; gap:8px; }
 .btn-primary { background:var(--primary); color:#fff; }
@@ -100,8 +116,9 @@ button, .pressable { transition:transform .12s ease, background .2s, opacity .2s
 .btn-cook { background:var(--success-bg); color:var(--success); }
 .input-styled { flex:1; padding:14px 16px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:16px; outline:none; min-width:0; }
 .input-styled:focus { border-color:var(--primary); }
+select.input-styled { appearance:none; -webkit-appearance:none; padding-right:34px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
 textarea.input-styled { resize:none; height:130px; line-height:1.4; }
-.shop-add { display:flex; gap:8px; margin-bottom:18px; }
+.shop-add { display:flex; gap:8px; margin-bottom:12px; }
 .section-head { display:flex; align-items:center; justify-content:space-between; font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin:4px 4px 8px; }
 .section-toggle { width:100%; text-align:left; }
 .shop-item { display:flex; align-items:center; gap:10px; background:var(--surface); padding:12px 12px 12px 14px; border-radius:12px; margin-bottom:8px; box-shadow:var(--shadow); border:1px solid var(--card-border); animation:fadeIn .25s ease; }
@@ -128,6 +145,18 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 .dish-ingredients { font-size:13px; color:var(--muted); margin-top:10px; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer; }
 .dish-ingredients.open { -webkit-line-clamp:unset; display:block; }
 .dish-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
+
+/* Karta składnika w Bazie */
+.ing-card { display:flex; align-items:center; gap:8px; background:var(--surface); padding:12px 14px; border-radius:14px; margin-bottom:8px; box-shadow:var(--shadow); border:1px solid var(--card-border); }
+.ing-card-info { flex:1; min-width:0; }
+.ing-card-name { font-size:15px; font-weight:600; overflow-wrap:anywhere; }
+.ing-card-cat { display:inline-block; font-size:11px; color:var(--primary); background:var(--primary-bg); padding:2px 7px; border-radius:6px; margin-top:4px; }
+
+/* Szybkie podpowiedzi składników w edytorze dania */
+.ing-picker-chips { display:flex; gap:6px; overflow-x:auto; padding:6px 0 2px; scrollbar-width:none; }
+.ing-picker-chips::-webkit-scrollbar { display:none; }
+.ing-picker-chip { flex-shrink:0; padding:5px 10px; border-radius:14px; background:var(--primary-bg); color:var(--primary); font-size:12px; font-weight:600; }
+
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; justify-content:center; align-items:flex-end; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }
 .modal.open { display:flex; }
 .sheet { background:var(--bg); width:100%; max-width:600px; border-radius:24px 24px 0 0; display:flex; flex-direction:column; max-height:90vh; max-height:90dvh; animation:slideUp .35s cubic-bezier(.1,.9,.2,1); }
@@ -143,6 +172,10 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 .form-group { margin-bottom:16px; }
 .form-label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; margin-left:4px; }
 .form-hint { font-size:12px; color:var(--muted); margin:6px 4px 0; }
+.cat-row { display:flex; gap:6px; align-items:center; }
+.cat-btn-sm { padding:12px 10px; border-radius:12px; font-size:13px; font-weight:600; flex-shrink:0; background:var(--surface); border:1px solid var(--border); }
+.cat-btn-sm.del { background:var(--danger-bg); color:var(--danger); border-color:transparent; }
+
 .fab { position:fixed; bottom:calc(85px + env(safe-area-inset-bottom)); right:20px; width:56px; height:56px; background:var(--primary); color:#fff; border-radius:28px; display:none; justify-content:center; align-items:center; font-size:30px; box-shadow:0 4px 12px rgba(0,122,255,.4); z-index:90; }
 .fab.show { display:flex; }
 .bottom-nav { position:fixed; bottom:0; left:0; width:100%; background:var(--nav-bg); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:flex; border-top:1px solid var(--border); padding-bottom:env(safe-area-inset-bottom); z-index:100; }
@@ -201,20 +234,41 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
     <input type="text" id="newShopAmount" class="input-styled" style="flex:none;width:80px;padding:14px 8px;text-align:center;" placeholder="Ilość" autocomplete="off">
     <button class="btn-large btn-primary" style="width:auto;padding:14px 16px;" data-act="add-shop">Dodaj</button>
   </div>
+  <button id="btn-clear-all-shop" class="btn-large btn-danger" style="margin-bottom:14px;padding:11px;display:none;" data-act="clear-all-shop">
+    🧹 Wyczyść całą listę zakupów
+  </button>
   <div id="shop-list-container"></div>
 </main>
 
-<!-- BAZA -->
+<!-- BAZA (DANIA + SKŁADNIKI) -->
 <main id="view-baza" class="container">
-  <!-- Specjalny przycisk do generowania składników (zniknie jeśli wszystko wygeneruje) -->
-  <button id="btn-auto-ing" class="btn-large" style="background:#ff9500; color:white; margin-bottom: 16px;" data-act="auto-ingredients">
-    🤖 Wygeneruj brakujące składniki
-  </button>
-  <input type="search" id="bazaSearch" class="input-styled" style="width:100%;margin-bottom:12px;" placeholder="Szukaj dania…" autocomplete="off">
-  <div class="chips" id="catChips"></div>
-  <div id="baza-list-container"></div>
+  <div class="seg-control">
+    <button id="seg-dishes" class="seg-btn active" data-act="baza-mode" data-mode="dishes">🍲 Dania</button>
+    <button id="seg-ingredients" class="seg-btn" data-act="baza-mode" data-mode="ingredients">🥕 Składniki</button>
+  </div>
+
+  <!-- Podwidok: Dania -->
+  <div id="subview-dishes" class="subview active">
+    <button id="btn-auto-ing" class="btn-large" style="background:#ff9500; color:white; margin-bottom: 14px; display:none;" data-act="auto-ingredients">
+      🤖 Wygeneruj brakujące składniki dań
+    </button>
+    <input type="search" id="bazaSearch" class="input-styled" style="width:100%;margin-bottom:12px;" placeholder="Szukaj dania…" autocomplete="off">
+    <div class="chips" id="catChips"></div>
+    <div id="baza-list-container"></div>
+  </div>
+
+  <!-- Podwidok: Składniki -->
+  <div id="subview-ingredients" class="subview">
+    <button id="btn-seed-ing-db" class="btn-large" style="background:#ff9500; color:white; margin-bottom: 14px; display:none;" data-act="seed-ingredients-db">
+      🤖 Załaduj domyślną bazę składników (220+)
+    </button>
+    <input type="search" id="ingBazaSearch" class="input-styled" style="width:100%;margin-bottom:12px;" placeholder="Szukaj składnika…" autocomplete="off">
+    <div class="chips" id="ingCatChips"></div>
+    <div id="ing-baza-list-container"></div>
+  </div>
 </main>
-<button id="fab-add" class="fab" data-act="new-dish" aria-label="Nowe danie">+</button>
+
+<button id="fab-add" class="fab" data-act="fab-action" aria-label="Dodaj">+</button>
 
 <nav class="bottom-nav">
   <button id="tab-plan" class="nav-tab active" data-act="tab" data-tab="plan">
@@ -225,21 +279,21 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
     <span class="nav-badge" id="shopBadge">0</span>
   </button>
   <button id="tab-baza" class="nav-tab" data-act="tab" data-tab="baza">
-    <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Baza dań
+    <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Baza
   </button>
 </nav>
 
-<!-- MODAL: wybór posiłku -->
+<!-- MODAL: wybór posiłku do planu -->
 <div id="foodModal" class="modal">
   <div class="sheet">
     <div class="sheet-header">
       <div class="sheet-handle"></div>
-      <h3 class="sheet-title" id="foodModalTitle">Opcje posiłku</h3>
+      <h3 class="sheet-title" id="foodModalTitle">Dodaj do posiłku</h3>
       <button class="sheet-close" data-act="close" data-modal="foodModal" aria-label="Zamknij">&times;</button>
     </div>
-    <div class="sheet-section" id="foodModalExtra"></div>
+    <div class="sheet-section" id="foodModalExtra" style="display:none;"></div>
     <div class="sheet-section" style="border-top:1px solid var(--border);">
-      <input type="search" id="modalSearch" class="input-styled" style="width:100%;" placeholder="Wybierz danie…" autocomplete="off">
+      <input type="search" id="modalSearch" class="input-styled" style="width:100%;" placeholder="Szukaj dania do dodania…" autocomplete="off">
     </div>
     <div class="sheet-body" id="modalDishesList"></div>
   </div>
@@ -260,21 +314,55 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
         <input type="text" id="editDishName" class="input-styled" style="width:100%;" placeholder="np. Spaghetti">
       </div>
       <div class="form-group">
-        <label class="form-label" for="editDishCat">Kategoria</label>
-        <input type="text" id="editDishCat" class="input-styled" style="width:100%;" placeholder="np. Obiad" list="catList">
-        <datalist id="catList"></datalist>
+        <label class="form-label" for="editDishCatSelect">Kategoria dania</label>
+        <div class="cat-row">
+          <select id="editDishCatSelect" class="input-styled"></select>
+          <button type="button" class="cat-btn-sm" data-act="toggle-new-dish-cat">➕ Nowa</button>
+          <button type="button" class="cat-btn-sm del" data-act="delete-dish-cat">🗑 Usuń kat.</button>
+        </div>
+        <input type="text" id="editDishCatNew" class="input-styled" style="width:100%;margin-top:8px;display:none;" placeholder="Wpisz nową kategorię dania…">
       </div>
       <div class="form-group">
         <label class="form-label" for="editDishIng">Składniki</label>
         <textarea id="editDishIng" class="input-styled" style="width:100%;" placeholder="Makaron 500 g&#10;Passata pomidorowa&#10;Mąka 1,5 kg"></textarea>
-        <div class="form-hint">Każdy składnik w nowej linii (lub rozdzielony średnikiem) – dzięki temu przecinek w ilości nie rozbija wpisu.</div>
+        <div class="form-hint">Każdy składnik w nowej linii (lub rozdzielony średnikiem). Możesz też kliknąć składnik z bazy poniżej, aby dopisać go do listy:</div>
+        <input type="search" id="dishIngQuickSearch" class="input-styled" style="width:100%;margin-top:8px;padding:9px 12px;font-size:14px;" placeholder="🔍 Szukaj w bazie składników, aby kliknąć i dodać…" autocomplete="off">
+        <div id="dishIngQuickChips" class="ing-picker-chips"></div>
       </div>
       <button class="btn-large btn-primary" data-act="save-dish">Zapisz danie</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: wybór składników -->
+<!-- MODAL: edytor składnika w bazie -->
+<div id="ingDbModal" class="modal">
+  <div class="sheet">
+    <div class="sheet-header">
+      <div class="sheet-handle"></div>
+      <h3 class="sheet-title" id="ingDbModalTitle">Nowy składnik</h3>
+      <button class="sheet-close" data-act="close" data-modal="ingDbModal" aria-label="Zamknij">&times;</button>
+    </div>
+    <div class="sheet-body">
+      <input type="hidden" id="editIngDbId">
+      <div class="form-group">
+        <label class="form-label" for="editIngDbName">Nazwa składnika</label>
+        <input type="text" id="editIngDbName" class="input-styled" style="width:100%;" placeholder="np. Pierś z kurczaka (filet)">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="editIngDbCatSelect">Kategoria składnika</label>
+        <div class="cat-row">
+          <select id="editIngDbCatSelect" class="input-styled"></select>
+          <button type="button" class="cat-btn-sm" data-act="toggle-new-ing-cat">➕ Nowa</button>
+          <button type="button" class="cat-btn-sm del" data-act="delete-ing-cat">🗑 Usuń kat.</button>
+        </div>
+        <input type="text" id="editIngDbCatNew" class="input-styled" style="width:100%;margin-top:8px;display:none;" placeholder="Wpisz nową kategorię składnika…">
+      </div>
+      <button class="btn-large btn-primary" data-act="save-ing-db">Zapisz składnik</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: wybór składników do eksportu -->
 <div id="ingredientModal" class="modal">
   <div class="sheet">
     <div class="sheet-header">
@@ -333,7 +421,7 @@ try {
   db = initializeFirestore(app, {});
 }
 
-/* ---------- SŁOWNIK AUTOMATYCZNYCH SKŁADNIKÓW ---------- */
+/* ---------- SŁOWNIK AUTOMATYCZNYCH SKŁADNIKÓW DLA DAŃ ---------- */
 const autoIngredients = {
   "Spaghetti": "Makaron spaghetti\nMięso mielone\nPassata pomidorowa\nCebula\nCzosnek\nParmezan/Grana Padano",
   "Kotlet schabowy": "Schab w plastrach\nJajka\nBułka tarta\nZiemniaki\nOlej do smażenia\nMizeria/Surówka",
@@ -398,13 +486,115 @@ const autoIngredients = {
   "Owoce pod kruszonką": "Mrożone/świeże owoce\nMąka\nMasło\nCukier"
 };
 
+/* ---------- SZCZEGÓŁOWA BAZA SKŁADNIKÓW Z KATEGORIAMI (220+ pozycji) ---------- */
+const DEFAULT_INGREDIENTS_CATALOG = {
+  "Mięso – Drób i Podroby": [
+    "Pierś z kurczaka (filet)", "Polędwiczki z kurczaka", "Udka z kurczaka", "Podudzia z kurczaka (pałki)",
+    "Skrzydełka z kurczaka", "Porcja rosołowa z kurczaka / kaczki", "Mięso mielone z indyka / kurczaka",
+    "Pierś z indyka (filet)", "Wątróbka drobiowa", "Żołądki / Serca drobiowe"
+  ],
+  "Mięso – Wieprzowina i Wołowina": [
+    "Mięso mielone wieprzowe (z łopatki / szynki)", "Mięso mielone wołowe (na burgery)", "Mięso mielone wieprzowo-wołowe",
+    "Schab bez kości (w plastrach / w całości)", "Karkówka wieprzowa (karczek)", "Łopatka wieprzowa",
+    "Szynka wieprzowa surowa", "Polędwiczka wieprzowa", "Żeberka wieprzowe", "Mięso gulaszowe wieprzowe",
+    "Mięso gulaszowe wołowe", "Szponder wołowy / Mięso wołowe na rosół", "Antrykot / Rostbef wołowy (steki)"
+  ],
+  "Wędliny i Kiełbasy": [
+    "Szynka w plastrach (konserwowa / gotowana)", "Szynka parmeńska / Prosciutto / Szwarcwaldzka",
+    "Boczek wędzony (w plastrach / w kostkę)", "Boczek surowy", "Kiełbasa śląska / podwawelska / toruńska",
+    "Biała kiełbasa (surowa / parzona)", "Kabanosy", "Parówki (do hot-dogów / śniadaniowe)",
+    "Salami / Pepperoni", "Chorizo", "Polędwica sopocka / drobiowa"
+  ],
+  "Ryby i Owoce morza": [
+    "Filet z łososia (świeży)", "Łosoś wędzony w plastrach", "Filet z dorsza / miruny / mintaja",
+    "Pstrąg patroszony", "Tuńczyk w puszce (w sosie własnym / w oleju)", "Krewetki (świeże / mrożone)",
+    "Śledzie (filety w oleju / w śmietanie)", "Makrela wędzona"
+  ],
+  "Nabiał, Sery i Jajka": [
+    "Jajka", "Mleko", "Śmietana 12% (do zup i sałatek)", "Śmietana 18% (gęsta do zup i sosów)",
+    "Śmietanka 30% (kremówka)", "Śmietanka 36%", "Masło (82%)", "Margaryna do pieczenia",
+    "Ser żółty (Gouda / Edamski / Królewski)", "Ser Cheddar", "Ser Mozzarella (kulka w zalewie)",
+    "Ser Mozzarella tarty / w bloku (do pizzy)", "Parmezan / Grana Padano / Bursztyn", "Serek Mascarpone",
+    "Ser Feta / Ser sałatkowy typu greckiego", "Ser Halloumi", "Ser pleśniowy (Camembert / Brie / Lazur)",
+    "Twaróg (chudy / półtłusty / tłusty)", "Serek wiejski", "Serek śmietankowy kanapkowy",
+    "Jogurt naturalny / Jogurt grecki", "Kefir / Maślanka"
+  ],
+  "Warzywa świeże i Zioła": [
+    "Ziemniaki", "Bataty (słodkie ziemniaki)", "Marchewka", "Pietruszka (korzeń)", "Seler korzeniowy",
+    "Seler naciowy", "Por", "Włoszczyzna (pęczek na zupę)", "Cebula żółta", "Cebula czerwona",
+    "Cebula dymka ze szczypiorkiem", "Czosnek", "Pomidory (malinowe / gałązka)", "Pomidorki koktajlowe",
+    "Ogórek świeży (długi / gruntowy)", "Papryka czerwona / żółta / zielona", "Papryczka chili / Jalapeño",
+    "Pieczarki", "Cukinia", "Bakłażan", "Brokuł", "Kalafior", "Kapusta biała / młoda kapusta",
+    "Kapusta pekińska / czerwona", "Buraki surowe / gotowane", "Szpinak świeży (baby)",
+    "Sałata (masłowa / lodowa / rzymska)", "Miks sałat / Rukola / Roszponka", "Rzodkiewka", "Awokado",
+    "Świeży koperek (pęczek)", "Świeża natka pietruszki (pęczek)", "Świeża bazylia / kolendra / mięta",
+    "Imbir świeży (korzeń)"
+  ],
+  "Owoce świeże": [
+    "Jabłka", "Banany", "Cytryny", "Limonki", "Pomarańcze / Mandarynki", "Truskawki / Maliny / Borówki",
+    "Winogrona", "Gruszki", "Brzoskwinie / Nektarynki", "Kiwi"
+  ],
+  "Pieczywo i Wyroby mączne": [
+    "Chleb (pszenno-żytni / razowy / na zakwasie)", "Chleb tostowy", "Bułki kajzerki / pszenne / grahamki",
+    "Bagietka (na zapiekanki / czosnkowa)", "Bułki do burgerów (Brioche / z sezamem)", "Bułki do hot-dogów",
+    "Chlebki Pita", "Tortille (pszenne / pełnoziarniste – na wrapy)", "Spód do pizzy (gotowy)",
+    "Ciasto francuskie / Ciasto kruche (gotowe)"
+  ],
+  "Makarony, Ryże, Kasze i Mąki": [
+    "Makaron Spaghetti", "Makaron Penne / Fusilli / Kokardki", "Makaron nitki (do rosołu)",
+    "Makaron Lasagne (płaty)", "Makaron ryżowy (nitki / wstążki)", "Makaron Udon / Chow Mein",
+    "Ryż biały / Parboiled", "Ryż Basmati / Jaśminowy", "Ryż do risotto (Arborio)",
+    "Kasza jęczmienna (na krupnik)", "Kasza gryczana", "Kasza jaglana / pęczak / bulgur / kuskus",
+    "Płatki owsiane (górskie / błyskawiczne)", "Mąka pszenna (tortowa / uniwersalna)",
+    "Mąka do pizzy (typ 00)", "Mąka ziemniaczana", "Bułka tarta (do panierowania)"
+  ],
+  "Przetwory, Puszki, Kiszonki i Sosy": [
+    "Passata pomidorowa (przecier)", "Pomidory krojone / całe w puszce (Pelati)", "Koncentrat pomidorowy",
+    "Ogórki kiszone", "Ogórki konserwowe (korniszony)", "Kapusta kiszona", "Zakwas na żurek",
+    "Zakwas na barszcz biały / czerwony", "Szczaw w słoiku", "Kukurydza konserwowa w puszce",
+    "Groszek konserwowy w puszce", "Fasola czerwona w puszce", "Fasola biała w puszce / Cieciorka",
+    "Oliwki (zielone / czarne) / Kapary / Suszone pomidory", "Ketchup (łagodny / pikantny)",
+    "Musztarda (stołowa / sarepska / francuska / miodowa)", "Majonez", "Chrzan / Ćwikła",
+    "Sos sojowy (jasny / ciemny)", "Sos słodko-kwaśny (w słoiku)", "Sos BBQ",
+    "Sos czosnkowy / Sos do burgerów / Sriracha", "Pesto (zielone bazyliowe / czerwone)", "Mleczko kokosowe w puszce"
+  ],
+  "Tłuszcze, Przyprawy i Dodatki kulinarne": [
+    "Olej rzepakowy / słonecznikowy (do smażenia)", "Oliwa z oliwek", "Olej sezamowy / kokosowy",
+    "Bulion (drobiowy / warzywny / wołowy)", "Sól / Pieprz czarny", "Cukier biały / trzcinowy / Cukier puder",
+    "Miód", "Syrop klonowy", "Ocet spirytusowy / jabłkowy / balsamiczny", "Prażona cebulka",
+    "Suszone grzyby (do bigosu / sosu)", "Przyprawa do kurczaka / do kebaba / gyrosa",
+    "Przyprawa do mięsa mielonego / do ziemniaków", "Majeranek / Oregano / Bazylia suszona / Tymianek / Rozmaryn",
+    "Papryka słodka / ostra / wędzona (w proszku)", "Curry / Kurkuma / Kumin", "Liść laurowy / Ziele angielskie"
+  ],
+  "Wypieki, Desery i Bakalie": [
+    "Drożdże (świeże / suszone instant)", "Proszek do pieczenia", "Soda oczyszczona",
+    "Cukier wanilinowy / Ekstrakt waniliowy", "Kakao (gorzkie)", "Czekolada (gorzka / mleczna / biała)",
+    "Biszkopty podłużne (Savoiardi do tiramisu) / okrągłe", "Masło orzechowe / Krem czekoladowy",
+    "Dżem / Powidła / Konfitura", "Wiórki kokosowe / Rodzynki / Żurawina",
+    "Orzechy (włoskie, laskowe, nerkowca, ziemne) / Migdały", "Słonecznik / Pestki dyni / Sezam"
+  ],
+  "Mrożonki i Dania gotowe": [
+    "Frytki mrożone (proste / karbowane / z batatów)", "Warzywa na patelnię (mieszanka mrożona)",
+    "Warzywa azjatyckie / chińskie (mieszanka mrożona)", "Włoszczyzna mrożona (paski / kostka)",
+    "Szpinak mrożony / Groszek mrożony / Marchewka z groszkiem", "Owoce mrożone (truskawki / maliny / mieszanka)",
+    "Uszka z grzybami / z mięsem (do barszczu)", "Krokiety / Pierogi gotowe / Kluski na parze", "Lody"
+  ],
+  "Napoje": [
+    "Woda niegazowana", "Woda gazowana", "Kawa (ziarnista / mielona / rozpuszczalna)",
+    "Herbata (czarna / zielona / owocowa)", "Sok (pomarańczowy / jabłkowy / pomidorowy)",
+    "Napoje gazowane", "Białe wino / Czerwone wino (do gotowania)", "Piwo"
+  ]
+};
+
+const DEFAULT_DISH_CATEGORIES = ["Śniadanie", "Zupa", "Obiad", "Kolacja", "Deser", "Dodatek", "Przekąska"];
+
 /* ---------- Pomocnicze ---------- */
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = s => String(s ?? '').trim().toLowerCase();
 const DNI = ["Poniedziałek","Wtorek","Środa","Czwartek","Piątek"];
 const POSILKI = ["Śniadanie","Obiad","Kolacja","Dodatek"];
-const TITLES = { plan:'Planer', shop:'Zakupy', baza:'Baza dań' };
+const TITLES = { plan:'Planer', shop:'Zakupy', baza:'Baza dań i składników' };
 
 const store = {
   get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
@@ -418,15 +608,80 @@ function safe(promise) {
 
 /* ---------- Stan ---------- */
 let currentUser = store.get('zakupki_user', 'Wiktor') === 'Julia' ? 'Julia' : 'Wiktor';
-let dishes = [], shoppingItems = [], currentPlan = {};
+let dishes = [], ingredientsCatalog = [], shoppingItems = [], currentPlan = {};
+let customCategories = { dish: [], ing: [] };
 let activeSelection = { day:null, meal:null };
-let activeCat = '';
+let activeCat = '', activeIngCat = '';
+let bazaMode = 'dishes'; // 'dishes' | 'ingredients'
 let showDone = false;
 let wakeLock = null, cookingOpen = false;
-let loaded = { dishes:false, shop:false, plan:false };
+let loaded = { dishes:false, ingredients:false, shop:false, plan:false };
 let pendingShopRender = false;
 let didAutoScroll = false;
 let currentTab = 'plan';
+
+/* ---------- Jamniki w tle (odbijające się od krawędzi ekranu) ---------- */
+let bouncingDogs = [];
+let dogRafId = null;
+
+function manageDachshunds() {
+  const existing = document.getElementById('dachshund-layer');
+  if (currentUser === 'Julia') {
+    let layer = existing;
+    if (!layer) {
+      layer = document.createElement('div');
+      layer.id = 'dachshund-layer';
+      layer.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:99; overflow:hidden;';
+      document.body.appendChild(layer);
+    }
+    if (bouncingDogs.length === 0) {
+      const count = 5;
+      const w = window.innerWidth || 360;
+      const h = window.innerHeight || 640;
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.textContent = '🐕';
+        const size = 28 + (i % 3) * 6;
+        el.style.cssText = `position:absolute; left:0; top:0; font-size:${size}px; line-height:1; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.08)); opacity:0.82; will-change:transform;`;
+        layer.appendChild(el);
+        const speed = 0.45 + Math.random() * 0.35; // powolne tempo
+        const angle = (Math.PI / 4) + (i * Math.PI / 2) + (Math.random() * 0.3);
+        bouncingDogs.push({
+          el,
+          size,
+          x: Math.random() * Math.max(50, w - size - 20) + 10,
+          y: Math.random() * Math.max(50, h - size - 80) + 20,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed
+        });
+      }
+    }
+    if (!dogRafId) {
+      const step = () => {
+        if (currentUser !== 'Julia') { dogRafId = null; return; }
+        const maxW = window.innerWidth - 38;
+        const maxH = window.innerHeight - 38;
+        for (const d of bouncingDogs) {
+          d.x += d.vx;
+          d.y += d.vy;
+          if (d.x <= 0) { d.x = 0; d.vx = Math.abs(d.vx); }
+          else if (d.x >= maxW) { d.x = Math.max(0, maxW); d.vx = -Math.abs(d.vx); }
+          if (d.y <= 0) { d.y = 0; d.vy = Math.abs(d.vy); }
+          else if (d.y >= maxH) { d.y = Math.max(0, maxH); d.vy = -Math.abs(d.vy); }
+          // Emoji 🐕 domyślnie patrzy w lewo, więc przy ruchu w prawo odbijamy lustrzanie (scaleX(-1))
+          const flip = d.vx > 0 ? -1 : 1;
+          d.el.style.transform = `translate3d(${d.x.toFixed(1)}px, ${d.y.toFixed(1)}px, 0) scaleX(${flip})`;
+        }
+        dogRafId = requestAnimationFrame(step);
+      };
+      dogRafId = requestAnimationFrame(step);
+    }
+  } else {
+    if (dogRafId) { cancelAnimationFrame(dogRafId); dogRafId = null; }
+    bouncingDogs = [];
+    if (existing) existing.remove();
+  }
+}
 
 /* ---------- Toast ---------- */
 let toastTimer = null;
@@ -480,24 +735,35 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   $(`view-${tab}`).classList.add('active');
   $(`tab-${tab}`).classList.add('active');
-  $('topTitle').textContent = TITLES[tab];$('fab-add').classList.toggle('show', tab === 'baza');
+  $('topTitle').textContent = TITLES[tab];
+  $('fab-add').classList.toggle('show', tab === 'baza');
   window.scrollTo(0, 0);
+}
+
+function switchBazaMode(mode) {
+  bazaMode = mode;
+  $('seg-dishes').classList.toggle('active', mode === 'dishes');
+  $('seg-ingredients').classList.toggle('active', mode === 'ingredients');
+  $('subview-dishes').classList.toggle('active', mode === 'dishes');
+  $('subview-ingredients').classList.toggle('active', mode === 'ingredients');
 }
 
 function switchUser(user) {
   currentUser = user;
   store.set('zakupki_user', user);
   updateAvatars();
+  manageDachshunds();
   loaded.plan = false;
   renderPlan();
   listenToPlan();
 }
 function updateAvatars() {
-  $('avatar-Wiktor').classList.toggle('active', currentUser === 'Wiktor');$('avatar-Julia').classList.toggle('active', currentUser === 'Julia');
+  $('avatar-Wiktor').classList.toggle('active', currentUser === 'Wiktor');
+  $('avatar-Julia').classList.toggle('active', currentUser === 'Julia');
   document.documentElement.setAttribute('data-user', currentUser);
 }
 
-/* ---------- Składniki ---------- */
+/* ---------- Składniki i Kategorie ---------- */
 function parseIng(str) {
   if (!str) return [];
   const sep = /[\n;]/.test(str) ? /[\n;]+/ : /,/;
@@ -505,7 +771,6 @@ function parseIng(str) {
 }
 function splitIngAmount(raw) {
   const s = String(raw ?? '').trim();
-  // Wykrywa np. "Makaron 500 g", "Mąka 1,5 kg", "Mleko 2 l" (nie rusza "Śmietana 18%" ani "30%")
   const m = s.match(/^(.+?)\s+(\d+(?:[.,]\d+)?\s*(?:g|dag|kg|ml|l|szt\.?|sztuk|opak\.?|op\.?|pęczek|pęczki|puszka|puszki|ząbek|ząbki|łyżk[ai]|łyżeczk[ai]|szklank[ai])?)$/i);
   if (m && !m[2].includes('%')) {
     return { name: m[1].trim(), amount: m[2].trim() };
@@ -518,6 +783,79 @@ function dedupe(list) {
   return out;
 }
 
+onSnapshot(doc(db, "settings", "categories"), snap => {
+  if (snap.exists()) {
+    const data = snap.data();
+    customCategories.dish = Array.isArray(data.dish) ? data.dish : [];
+    customCategories.ing = Array.isArray(data.ing) ? data.ing : [];
+  }
+  updateCategorySelects();
+  renderBaza();
+  renderIngredientsBaza();
+}, err => console.warn('Kategorie z settings niedostępne:', err));
+
+function getAllDishCategories() {
+  const s = new Set([...DEFAULT_DISH_CATEGORIES, ...customCategories.dish, ...dishes.map(d => d.category).filter(Boolean)]);
+  return [...s].sort((a, b) => a.localeCompare(b, 'pl'));
+}
+
+function getAllIngCategories() {
+  const s = new Set([...Object.keys(DEFAULT_INGREDIENTS_CATALOG), ...customCategories.ing, ...ingredientsCatalog.map(i => i.category).filter(Boolean)]);
+  return [...s].sort((a, b) => a.localeCompare(b, 'pl'));
+}
+
+function updateCategorySelects(selectedDishCat = null, selectedIngCat = null) {
+  const dishSel = $('editDishCatSelect');
+  if (dishSel) {
+    const cur = selectedDishCat !== null ? selectedDishCat : dishSel.value;
+    const cats = getAllDishCategories();
+    dishSel.innerHTML = `<option value="">— Brak kategorii —</option>` +
+      cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    dishSel.value = cats.includes(cur) ? cur : '';
+  }
+  const ingSel = $('editIngDbCatSelect');
+  if (ingSel) {
+    const cur = selectedIngCat !== null ? selectedIngCat : ingSel.value;
+    const cats = getAllIngCategories();
+    ingSel.innerHTML = `<option value="">— Brak kategorii —</option>` +
+      cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    ingSel.value = cats.includes(cur) ? cur : '';
+  }
+}
+
+async function saveCustomCategory(type, newCat) {
+  const clean = newCat.trim();
+  if (!clean) return;
+  const list = type === 'dish' ? customCategories.dish : customCategories.ing;
+  if (!list.includes(clean)) {
+    const nextList = [...list, clean];
+    if (type === 'dish') customCategories.dish = nextList;
+    else customCategories.ing = nextList;
+    await safe(setDoc(doc(db, "settings", "categories"), { [type]: nextList }, { merge: true }));
+  }
+}
+
+async function deleteCategory(type) {
+  const selectEl = type === 'dish' ? $('editDishCatSelect') : $('editIngDbCatSelect');
+  const cat = selectEl.value;
+  if (!cat) return toast('Wybierz kategorię z listy, aby ją usunąć');
+  if (!confirm(`Usunąć kategorię „${cat}"? Zostanie ona również odpięta od przypisanych pozycji.`)) return;
+
+  const batch = writeBatch(db);
+  if (type === 'dish') {
+    customCategories.dish = customCategories.dish.filter(c => c !== cat);
+    batch.set(doc(db, "settings", "categories"), { dish: customCategories.dish }, { merge: true });
+    dishes.filter(d => d.category === cat).forEach(d => batch.update(doc(db, "dishes", d.id), { category: "" }));
+  } else {
+    customCategories.ing = customCategories.ing.filter(c => c !== cat);
+    batch.set(doc(db, "settings", "categories"), { ing: customCategories.ing }, { merge: true });
+    ingredientsCatalog.filter(i => i.category === cat).forEach(i => batch.update(doc(db, "ingredients_catalog", i.id), { category: "" }));
+  }
+  await safe(batch.commit());
+  updateCategorySelects('', '');
+  toast(`Usunięto kategorię: ${cat}`);
+}
+
 /* ---------- Baza dań ---------- */
 onSnapshot(collection(db, "dishes"), snap => {
   dishes = [];
@@ -526,13 +864,8 @@ onSnapshot(collection(db, "dishes"), snap => {
   loaded.dishes = true;
   renderBaza();
   renderPlan();
-  updateCatList();
+  updateCategorySelects();
 }, err => { console.error(err); toast('Brak dostępu do bazy dań'); });
-
-function updateCatList() {
-  $('catList').innerHTML = [...new Set(dishes.map(d => d.category).filter(Boolean))]
-    .map(c => `<option value="${esc(c)}">`).join('');
-}
 
 function renderBaza() {
   const container = $('baza-list-container');
@@ -551,7 +884,7 @@ function renderBaza() {
   dishes.forEach(d => {
     if ((!d.ingredients || d.ingredients.trim() === '') && autoIngredients[d.name]) needsUpdate = true;
   });
-  $('btn-auto-ing').style.display = needsUpdate ? 'block' : 'none';
+  $('btn-auto-ing').style.display = needsUpdate ? 'flex' : 'none';
 
   if (dishes.length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="big">🍲</div><div class="t">Baza dań jest pusta</div><div class="s">Dodaj pierwsze danie przyciskiem +</div></div>`;
@@ -582,23 +915,44 @@ function renderBaza() {
   }).join('');
 }
 
+function renderDishQuickIngChips() {
+  const q = norm($('dishIngQuickSearch').value);
+  const pool = ingredientsCatalog.length
+    ? ingredientsCatalog.map(i => i.name)
+    : Object.values(DEFAULT_INGREDIENTS_CATALOG).flat();
+  const filtered = pool.filter(name => norm(name).includes(q)).slice(0, 25);
+  $('dishIngQuickChips').innerHTML = filtered.map(name =>
+    `<button type="button" class="ing-picker-chip" data-act="append-ing-to-dish" data-name="${esc(name)}">+ ${esc(name)}</button>`
+  ).join('');
+}
+
 function openDishEditor(id = null) {
   const d = id ? dishes.find(x => x.id === id) : null;
   $('dishModalTitle').textContent = d ? 'Edytuj danie' : 'Nowe danie';
   $('editDishId').value = d ? d.id : '';
   $('editDishName').value = d ? (d.name || '') : '';
-  $('editDishCat').value = d ? (d.category || '') : '';
+  $('editDishCatNew').style.display = 'none';
+  $('editDishCatNew').value = '';
+  updateCategorySelects(d ? (d.category || '') : '', null);
   $('editDishIng').value = d ? parseIng(d.ingredients).join('\n') : '';
+  $('dishIngQuickSearch').value = '';
+  renderDishQuickIngChips();
   openModal('dishModal');
 }
 
-function saveDish() {
+async function saveDish() {
   const id = $('editDishId').value;
   const name = $('editDishName').value.trim();
   if (!name) { toast('Podaj nazwę dania'); return; }
+  const newCatInput = $('editDishCatNew');
+  let category = $('editDishCatSelect').value.trim();
+  if (newCatInput.style.display !== 'none' && newCatInput.value.trim()) {
+    category = newCatInput.value.trim();
+    await saveCustomCategory('dish', category);
+  }
   const data = {
     name,
-    category: $('editDishCat').value.trim(),
+    category,
     ingredients: parseIng($('editDishIng').value).join('\n')
   };
   safe(id ? updateDoc(doc(db, "dishes", id), data) : addDoc(collection(db, "dishes"), data));
@@ -613,6 +967,126 @@ function deleteDish(id) {
   const backup = { ...d }; delete backup.id;
   safe(deleteDoc(doc(db, "dishes", id)));
   toast('Usunięto danie', { label:'Cofnij', fn:() => safe(setDoc(doc(db, "dishes", id), backup)) });
+}
+
+/* ---------- Baza składników (ingredients_catalog) ---------- */
+onSnapshot(collection(db, "ingredients_catalog"), snap => {
+  ingredientsCatalog = [];
+  snap.forEach(d => ingredientsCatalog.push({ id:d.id, ...d.data() }));
+  ingredientsCatalog.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pl'));
+  loaded.ingredients = true;
+  renderIngredientsBaza();
+  updateCategorySelects();
+}, err => { console.error(err); toast('Brak dostępu do bazy składników'); });
+
+function renderIngredientsBaza() {
+  const container = $('ing-baza-list-container');
+  if (!loaded.ingredients) { container.innerHTML = '<div class="skeleton sm"></div><div class="skeleton sm"></div>'; return; }
+
+  $('btn-seed-ing-db').style.display = ingredientsCatalog.length < 20 ? 'flex' : 'none';
+
+  const cats = [...new Set(ingredientsCatalog.map(i => i.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pl'));
+  if (activeIngCat && !cats.includes(activeIngCat)) activeIngCat = '';
+  $('ingCatChips').innerHTML =
+    `<button class="chip ${activeIngCat ? '' : 'active'}" data-act="ing-cat" data-cat="">Wszystkie (${ingredientsCatalog.length})</button>` +
+    cats.map(c => `<button class="chip ${c === activeIngCat ? 'active' : ''}" data-act="ing-cat" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
+
+  const q = norm($('ingBazaSearch').value);
+  const list = ingredientsCatalog.filter(i => norm(i.name).includes(q) && (!activeIngCat || i.category === activeIngCat));
+
+  if (ingredientsCatalog.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="big">🥕</div><div class="t">Baza składników jest pusta</div><div class="s">Kliknij pomarańczowy przycisk powyżej, aby załadować gotową listę 220+ składników, lub dodaj własny przyciskiem +</div></div>`;
+    return;
+  }
+  if (list.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="big">🔍</div><div class="t">Brak pasujących składników</div></div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(item => `
+    <div class="ing-card">
+      <div class="ing-card-info">
+        <div class="ing-card-name">${esc(item.name)}</div>
+        ${item.category ? `<span class="ing-card-cat">${esc(item.category)}</span>` : ''}
+      </div>
+      <input type="text" class="shop-amount ing-baza-amount" id="ing_amt_${esc(item.id)}" placeholder="ilość" aria-label="Ilość">
+      <button class="btn-icon" style="background:var(--export-bg);color:var(--export-color);" data-act="ing-to-shop" data-id="${esc(item.id)}" title="Dodaj do zakupów">🛒</button>
+      <button class="btn-icon" data-act="edit-ing-db" data-id="${esc(item.id)}" title="Edytuj">✏️</button>
+      <button class="btn-icon" style="background:var(--danger-bg);color:var(--danger);" data-act="del-ing-db" data-id="${esc(item.id)}" title="Usuń">&times;</button>
+    </div>
+  `).join('');
+}
+
+async function seedDefaultIngredients() {
+  const existingNames = new Set(ingredientsCatalog.map(i => norm(i.name)));
+  const toAdd = [];
+  for (const [category, names] of Object.entries(DEFAULT_INGREDIENTS_CATALOG)) {
+    for (const name of names) {
+      if (!existingNames.has(norm(name))) {
+        existingNames.add(norm(name));
+        toAdd.push({ name, category });
+      }
+    }
+  }
+  if (!toAdd.length) {
+    toast('Wszystkie domyślne składniki są już w bazie!');
+    $('btn-seed-ing-db').style.display = 'none';
+    return;
+  }
+  const batch = writeBatch(db);
+  toAdd.forEach(item => {
+    batch.set(doc(collection(db, "ingredients_catalog")), item);
+  });
+  await safe(batch.commit());
+  toast(`Załadowano ${toAdd.length} składników do bazy!`);
+}
+
+function openIngDbEditor(id = null) {
+  const item = id ? ingredientsCatalog.find(x => x.id === id) : null;
+  $('ingDbModalTitle').textContent = item ? 'Edytuj składnik' : 'Nowy składnik';
+  $('editIngDbId').value = item ? item.id : '';
+  $('editIngDbName').value = item ? (item.name || '') : '';
+  $('editIngDbCatNew').style.display = 'none';$('editIngDbCatNew').value = '';
+  updateCategorySelects(null, item ? (item.category || '') : (activeIngCat || ''));
+  openModal('ingDbModal');
+}
+
+async function saveIngDb() {
+  const id = $('editIngDbId').value;
+  const name = $('editIngDbName').value.trim();
+  if (!name) return toast('Podaj nazwę składnika');
+  const newCatInput = $('editIngDbCatNew');
+  let category = $('editIngDbCatSelect').value.trim();
+  if (newCatInput.style.display !== 'none' && newCatInput.value.trim()) {
+    category = newCatInput.value.trim();
+    await saveCustomCategory('ing', category);
+  }
+  const data = { name, category };
+  safe(id ? updateDoc(doc(db, "ingredients_catalog", id), data) : addDoc(collection(db, "ingredients_catalog"), data));
+  closeModal('ingDbModal');
+  toast(id ? 'Zapisano składnik' : 'Dodano składnik do bazy');
+}
+
+function deleteIngDb(id) {
+  const item = ingredientsCatalog.find(x => x.id === id);
+  if (!item) return;
+  if (!confirm(`Usunąć składnik „${item.name}" z bazy?`)) return;
+  const backup = { ...item }; delete backup.id;
+  safe(deleteDoc(doc(db, "ingredients_catalog", id)));
+  toast(`Usunięto: ${item.name}`, { label:'Cofnij', fn:() => safe(setDoc(doc(db, "ingredients_catalog", id), backup)) });
+}
+
+function sendIngFromBazaToShop(id) {
+  const item = ingredientsCatalog.find(x => x.id === id);
+  if (!item) return;
+  const amtInput = $(`ing_amt_${id}`);
+  const amount = amtInput ? amtInput.value.trim() : '';
+  if (shoppingItems.some(i => !i.checked && norm(i.name) === norm(item.name))) {
+    return toast(`„${item.name}" już jest na liście zakupów`);
+  }
+  if (amtInput) amtInput.value = '';
+  safe(addDoc(collection(db, "shopping"), { name: item.name, amount, checked:false, createdAt:Date.now() }));
+  toast(`Dodano do koszyka: ${item.name}`);
 }
 
 /* ---------- Tryb gotowania ---------- */
@@ -670,10 +1144,11 @@ function exportSingleDish(id) {
 }
 
 function exportPlanIngredients() {
-  const ids = Object.values(currentPlan).filter(Boolean);
-  if (!ids.length) return toast('Plan jest pusty');
+  const allVals = [];
+  DNI.forEach(d => POSILKI.forEach(m => allVals.push(...getPlanList(d, m))));
+  if (!allVals.length) return toast('Plan jest pusty');
   let all = [];
-  ids.forEach(v => { const d = resolveDish(v); if (d) all.push(...parseIng(d.ingredients)); });
+  allVals.forEach(v => { const d = resolveDish(v); if (d) all.push(...parseIng(d.ingredients)); });
   all = dedupe(all);
   if (!all.length) return toast('Dania w planie nie mają składników');
   openIngredientModal(all);
@@ -723,7 +1198,7 @@ function confirmAddIngredients() {
   switchTab('shop');
 }
 
-/* ---------- Planer ---------- */
+/* ---------- Planer (wiele dań w jednym posiłku) ---------- */
 let unsubscribePlan = null;
 function listenToPlan() {
   if (unsubscribePlan) unsubscribePlan();
@@ -734,8 +1209,12 @@ function listenToPlan() {
   }, err => { console.error(err); toast('Brak dostępu do planu'); });
 }
 
-function getPlanVal(dzien, posilek) {
-  return currentPlan[`${dzien}_${posilek}`] ?? (posilek === 'Dodatek' ? currentPlan[`${dzien}_Zachcianka`] : undefined);
+function getPlanList(dzien, posilek) {
+  let raw = currentPlan[`${dzien}_${posilek}`];
+  if (raw === undefined && posilek === 'Dodatek') raw = currentPlan[`${dzien}_Zachcianka`];
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.filter(Boolean);
+  return [raw];
 }
 
 function resolveDish(val) {
@@ -761,14 +1240,27 @@ function renderPlan() {
   container.innerHTML = DNI.map((dzien, i) => {
     const cls = i === today ? 'today' : '';
     const rows = POSILKI.map(posilek => {
-      const val = getPlanVal(dzien, posilek);
-      const filled = !!val;
+      const items = getPlanList(dzien, posilek);
+      const pillsHTML = items.map((val, idx) => {
+        const d = resolveDish(val);
+        return `
+          <div class="meal-pill">
+            <button class="meal-pill-name" data-act="${d ? 'cook' : 'pick'}" data-id="${d ? esc(d.id) : ''}" data-day="${dzien}" data-meal="${posilek}" title="Kliknij, aby gotować">
+              ${esc(planLabel(val))}
+            </button>
+            <button class="meal-pill-del" data-act="remove-plan-item" data-day="${dzien}" data-meal="${posilek}" data-idx="${idx}" aria-label="Usuń danie">&times;</button>
+          </div>`;
+      }).join('');
+
       return `
         <div class="meal-row">
           <div class="meal-label">${posilek}</div>
-          <button class="meal-box ${filled ? '' : 'empty'}" data-act="pick" data-day="${dzien}" data-meal="${posilek}">
-            ${filled ? esc(planLabel(val)) : '+ Wybierz'}
-          </button>
+          <div class="meal-items-col">
+            ${pillsHTML}
+            <button class="meal-box empty" data-act="pick" data-day="${dzien}" data-meal="${posilek}">
+              ${items.length ? '+ Dodaj kolejne' : '+ Wybierz'}
+            </button>
+          </div>
         </div>`;
     }).join('');
     return `
@@ -785,6 +1277,15 @@ function renderPlan() {
     didAutoScroll = true;
     requestAnimationFrame(() => $(`card-${today}`)?.scrollIntoView({ block:'center' }));
   }
+}
+
+function removePlanItem(day, meal, idx) {
+  const list = [...getPlanList(day, meal)];
+  list.splice(Number(idx), 1);
+  const key = `${day}_${meal}`;
+  const updates = { [key]: list.length ? list : deleteField() };
+  if (meal === 'Dodatek') updates[`${day}_Zachcianka`] = deleteField();
+  safe(setDoc(doc(db, "plans", currentUser), updates, { merge:true }));
 }
 
 function clearDay(day) {
@@ -807,12 +1308,6 @@ function clearWeek() {
 function openFoodModal(day, meal) {
   activeSelection = { day, meal };
   $('foodModalTitle').textContent = `${day} · ${meal}`;
-  const current = resolveDish(getPlanVal(day, meal));
-  const extra = $('foodModalExtra');
-  if (current) {
-    extra.innerHTML = `<button class="btn-large btn-success" style="margin:0;" data-act="cook" data-id="${esc(current.id)}">👨‍🍳 Gotuj: ${esc(current.name)}</button>`;
-    extra.style.display = 'block';
-  } else extra.style.display = 'none';
   $('modalSearch').value = '';
   filterModalDishes();
   openModal('foodModal');
@@ -821,9 +1316,9 @@ function openFoodModal(day, meal) {
 function filterModalDishes() {
   const q = norm($('modalSearch').value);
   const list = dishes.filter(d => norm(d.name).includes(q));
-  const hasCurrent = !!getPlanVal(activeSelection.day, activeSelection.meal);
+  const currentList = getPlanList(activeSelection.day, activeSelection.meal);
   $('modalDishesList').innerHTML =
-    (hasCurrent ? '<button class="modal-item" style="color:var(--danger);text-align:center;" data-act="pick-dish" data-id="">Wyczyść to pole</button>' : '') +
+    (currentList.length ? '<button class="modal-item" style="color:var(--danger);text-align:center;" data-act="pick-dish" data-id="">🧹 Wyczyść wszystkie dania z tego pola</button>' : '') +
     (list.length
       ? list.map(d => `<button class="modal-item" data-act="pick-dish" data-id="${esc(d.id)}">${esc(d.name)}${d.category ? `<span style="float:right;font-size:12px;color:var(--muted);">${esc(d.category)}</span>` : ''}</button>`).join('')
       : '<div class="empty-state" style="padding:24px;"><div class="s">Brak pasujących dań</div></div>');
@@ -831,10 +1326,15 @@ function filterModalDishes() {
 
 function selectDishForPlan(id) {
   closeModal('foodModal');
-  const key = `${activeSelection.day}_${activeSelection.meal}`;
-  const updates = { [key]: id ? id : deleteField() };
-  if (activeSelection.meal === 'Dodatek') {
-    updates[`${activeSelection.day}_Zachcianka`] = deleteField();
+  const { day, meal } = activeSelection;
+  const key = `${day}_${meal}`;
+  let nextList = [];
+  if (id) {
+    nextList = [...getPlanList(day, meal), id];
+  }
+  const updates = { [key]: nextList.length ? nextList : deleteField() };
+  if (meal === 'Dodatek') {
+    updates[`${day}_Zachcianka`] = deleteField();
   }
   safe(setDoc(doc(db, "plans", currentUser), updates, { merge:true }));
 }
@@ -865,6 +1365,8 @@ function renderShopping() {
   const badge = $('shopBadge');
   badge.textContent = todo.length;
   badge.classList.toggle('show', todo.length > 0);
+
+  $('btn-clear-all-shop').style.display = shoppingItems.length > 0 ? 'flex' : 'none';
 
   if (document.activeElement && document.activeElement.classList.contains('shop-amount')) { pendingShopRender = true; return; }
   pendingShopRender = false;
@@ -930,9 +1432,25 @@ function clearPurchased() {
   }});
 }
 
+function clearAllShopping() {
+  if (!shoppingItems.length) return;
+  if (!confirm(`Na pewno wyczyścić całą listę zakupów (${shoppingItems.length} poz.)?`)) return;
+  const backups = shoppingItems.map(i => { const { id, ...rest } = i; return [id, rest]; });
+  const batch = writeBatch(db);
+  shoppingItems.forEach(i => batch.delete(doc(db, "shopping", i.id)));
+  safe(batch.commit());
+  toast(`Wyczyszczono listę (${backups.length})`, { label:'Cofnij', fn:() => {
+    const b = writeBatch(db);
+    backups.forEach(([id, data]) => b.set(doc(db, "shopping", id), data));
+    safe(b.commit());
+  }});
+}
+
 /* ---------- Obsługa zdarzeń (delegacja) ---------- */
 const actions = {
   tab: el => switchTab(el.dataset.tab),
+  'baza-mode': el => switchBazaMode(el.dataset.mode),
+  'fab-action': () => bazaMode === 'dishes' ? openDishEditor() : openIngDbEditor(),
   user: el => switchUser(el.dataset.user),
   'toggle-theme': () => {
     const current = document.documentElement.getAttribute('data-theme');
@@ -967,6 +1485,7 @@ const actions = {
       $('btn-auto-ing').style.display = 'none';
     }
   },
+  'seed-ingredients-db': () => seedDefaultIngredients(),
   close: el => closeModal(el.dataset.modal),
   'close-cooking': () => closeCooking(),
   'export-plan': () => exportPlanIngredients(),
@@ -974,6 +1493,7 @@ const actions = {
   'clear-day': el => clearDay(el.dataset.day),
   pick: el => openFoodModal(el.dataset.day, el.dataset.meal),
   'pick-dish': el => selectDishForPlan(el.dataset.id),
+  'remove-plan-item': el => removePlanItem(el.dataset.day, el.dataset.meal, el.dataset.idx),
   cook: el => startCooking(el.dataset.id),
   'cook-item': el => {
     el.classList.toggle('done');
@@ -987,13 +1507,39 @@ const actions = {
   'del-shop': el => deleteShopItem(el.dataset.id),
   'toggle-done': () => { showDone = !showDone; renderShopping(); },
   'clear-purchased': () => clearPurchased(),
+  'clear-all-shop': () => clearAllShopping(),
   cat: el => { activeCat = el.dataset.cat; renderBaza(); },
+  'ing-cat': el => { activeIngCat = el.dataset.cat; renderIngredientsBaza(); },
   'new-dish': () => openDishEditor(),
   'edit-dish': el => openDishEditor(el.dataset.id),
   'save-dish': () => saveDish(),
   'del-dish': el => deleteDish(el.dataset.id),
   'export-dish': el => exportSingleDish(el.dataset.id),
   'toggle-ing': el => el.classList.toggle('open'),
+  'toggle-new-dish-cat': () => {
+    const inp = $('editDishCatNew');
+    const show = inp.style.display === 'none';
+    inp.style.display = show ? 'block' : 'none';
+    if (show) inp.focus();
+  },
+  'delete-dish-cat': () => deleteCategory('dish'),
+  'append-ing-to-dish': el => {
+    const area = $('editDishIng');
+    const cur = area.value.trim();
+    area.value = cur ? `${cur}\n${el.dataset.name}` : el.dataset.name;
+    toast(`Dopisano: ${el.dataset.name}`);
+  },
+  'edit-ing-db': el => openIngDbEditor(el.dataset.id),
+  'save-ing-db': () => saveIngDb(),
+  'del-ing-db': el => deleteIngDb(el.dataset.id),
+  'ing-to-shop': el => sendIngFromBazaToShop(el.dataset.id),
+  'toggle-new-ing-cat': () => {
+    const inp = $('editIngDbCatNew');
+    const show = inp.style.display === 'none';
+    inp.style.display = show ? 'block' : 'none';
+    if (show) inp.focus();
+  },
+  'delete-ing-cat': () => deleteCategory('ing'),
   'ing-all': () => document.querySelectorAll('.ing-export-checkbox').forEach(cb => cb.checked = true),
   'ing-none': () => document.querySelectorAll('.ing-export-checkbox').forEach(cb => cb.checked = false),
   'ing-confirm': () => confirmAddIngredients()
@@ -1017,12 +1563,15 @@ document.addEventListener('change', e => {
 });
 
 $('newShopInput').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });$('newShopAmount').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });
-$('bazaSearch').addEventListener('input', renderBaza);$('modalSearch').addEventListener('input', filterModalDishes);
+$('bazaSearch').addEventListener('input', renderBaza);$('ingBazaSearch').addEventListener('input', renderIngredientsBaza);
+$('modalSearch').addEventListener('input', filterModalDishes);$('dishIngQuickSearch').addEventListener('input', renderDishQuickIngChips);
 
 /* ---------- Start ---------- */
 updateAvatars();
+manageDachshunds();
 renderPlan();
 renderBaza();
+renderIngredientsBaza();
 renderShopping();
 listenToPlan();
 </script>
