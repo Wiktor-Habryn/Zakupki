@@ -118,7 +118,19 @@ button, .pressable { transition:transform .12s ease, background .2s, opacity .2s
 .input-styled:focus { border-color:var(--primary); }
 select.input-styled { appearance:none; -webkit-appearance:none; padding-right:34px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
 textarea.input-styled { resize:none; height:130px; line-height:1.4; }
-.shop-add { display:flex; gap:8px; margin-bottom:12px; }
+.shop-add { display:flex; gap:8px; margin-bottom:10px; }
+
+/* Podpowiedzi podczas wpisywania w Zakupach */
+.shop-suggestions { display:none; background:var(--surface); border:1px solid var(--border); border-radius:14px; margin-bottom:14px; box-shadow:var(--shadow); overflow:hidden; animation:fadeIn .18s ease; }
+.shop-suggestions.open { display:block; }
+.shop-sug-head { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; padding:8px 14px 4px; background:var(--surface); }
+.shop-sug-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 14px; border-top:1px solid var(--border); }
+.shop-sug-item:first-of-type { border-top:none; }
+.shop-sug-main { flex:1; text-align:left; min-width:0; }
+.shop-sug-name { font-size:15px; font-weight:600; color:var(--text); overflow-wrap:anywhere; }
+.shop-sug-cat { font-size:11px; color:var(--primary); margin-top:2px; }
+.shop-sug-add { padding:6px 12px; border-radius:10px; background:var(--primary-bg); color:var(--primary); font-size:13px; font-weight:700; flex-shrink:0; }
+
 .section-head { display:flex; align-items:center; justify-content:space-between; font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin:4px 4px 8px; }
 .section-toggle { width:100%; text-align:left; }
 .shop-item { display:flex; align-items:center; gap:10px; background:var(--surface); padding:12px 12px 12px 14px; border-radius:12px; margin-bottom:8px; box-shadow:var(--shadow); border:1px solid var(--card-border); animation:fadeIn .25s ease; }
@@ -290,11 +302,12 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
     <input type="text" id="newShopAmount" class="input-styled" style="flex:none;width:80px;padding:14px 8px;text-align:center;" placeholder="Ilość" autocomplete="off">
     <button class="btn-large btn-primary" style="width:auto;padding:14px 16px;" data-act="add-shop">Dodaj</button>
   </div>
+  <div id="shopSuggestions" class="shop-suggestions"></div>
+
   <button id="btn-clear-all-shop" class="btn-large btn-danger" style="margin-bottom:14px;padding:11px;display:none;" data-act="clear-all-shop">
     🧹 Wyczyść całą listę zakupów
   </button>
 
-  <!-- WKLEJ TEN BLOK TUTAJ: -->
   <div class="seg-control" id="shop-sort-bar" style="margin-bottom:14px;display:none;">
     <button class="seg-btn active" data-act="shop-sort" data-sort="added">🕒 Kolejność</button>
     <button class="seg-btn" data-act="shop-sort" data-sort="name">🔤 Nazwa A-Z</button>
@@ -324,7 +337,7 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
   <!-- Podwidok: Składniki -->
   <div id="subview-ingredients" class="subview">
     <button id="btn-seed-ing-db" class="btn-large" style="background:#ff9500; color:white; margin-bottom: 14px; display:none;" data-act="seed-ingredients-db">
-      🤖 Załaduj domyślną bazę składników (220+)
+      🤖 Załaduj domyślną bazę składników i produktów
     </button>
     <input type="search" id="ingBazaSearch" class="input-styled" style="width:100%;margin-bottom:12px;" placeholder="Szukaj składnika…" autocomplete="off">
     <div class="chips" id="ingCatChips"></div>
@@ -552,7 +565,7 @@ const autoIngredients = {
   "Owoce pod kruszonką": "Mrożone/świeże owoce\nMąka\nMasło\nCukier"
 };
 
-/* ---------- SZCZEGÓŁOWA BAZA SKŁADNIKÓW Z KATEGORIAMI (220+ pozycji) ---------- */
+/* ---------- SZCZEGÓŁOWA BAZA SKŁADNIKÓW I PRODUKTÓW DOMOWYCH Z KATEGORIAMI (320+ pozycji) ---------- */
 const DEFAULT_INGREDIENTS_CATALOG = {
   "Mięso – Drób i Podroby": [
     "Pierś z kurczaka (filet)", "Polędwiczki z kurczaka", "Udka z kurczaka", "Podudzia z kurczaka (pałki)",
@@ -649,6 +662,64 @@ const DEFAULT_INGREDIENTS_CATALOG = {
     "Woda niegazowana", "Woda gazowana", "Kawa (ziarnista / mielona / rozpuszczalna)",
     "Herbata (czarna / zielona / owocowa)", "Sok (pomarańczowy / jabłkowy / pomidorowy)",
     "Napoje gazowane", "Białe wino / Czerwone wino (do gotowania)", "Piwo"
+  ],
+  "Kuchnia – Zmywanie i Czyszczenie": [
+    "Płyn do mycia naczyń", "Tabletki do zmywarki", "Sól do zmywarki", "Nabłyszczacz do zmywarki",
+    "Gąbki do naczyń", "Druciak do garnków", "Ściereczki z mikrofibry", "Mleczko do czyszczenia",
+    "Płyn do płyty indukcyjnej", "Odtłuszczacz do piekarnika", "Odkamieniacz"
+  ],
+  "Kuchnia – Pakowanie i Odpady": [
+    "Ręcznik papierowy", "Worki na śmieci", "Worki na bio", "Folia aluminiowa",
+    "Folia spożywcza", "Papier do pieczenia", "Woreczki śniadaniowe", "Woreczki strunowe"
+  ],
+  "Pranie i Pielęgnacja Tkanin": [
+    "Proszek do prania", "Kapsułki do prania", "Płyn do płukania tkanin",
+    "Odplamiacz", "Chusteczki wyłapujące kolor", "Rolka do ubrań"
+  ],
+  "Sprzątanie i Porządki": [
+    "Płyn do podłóg", "Płyn do szyb i luster", "Płyn do kurzu",
+    "Wilgotne chusteczki czyszczące", "Kret do rur", "Spray na pleśń", "Odświeżacz powietrza"
+  ],
+  "Łazienka i Toaleta": [
+    "Papier toaletowy", "Nawilżany papier toaletowy", "Płyn do WC",
+    "Zawieszka do WC", "Płyn do kabin i armatury"
+  ],
+  "Higiena Osobista i Kąpiel": [
+    "Mydło do rąk", "Żel pod prysznic", "Szampon do włosów", "Odżywka do włosów",
+    "Płyn do higieny intymnej", "Chusteczki do higieny intymnej"
+  ],
+  "Higiena Menstruacyjna": [
+    "Podpaski", "Tampony", "Wkładki higieniczne", "Plastry rozgrzewające na brzuch"
+  ],
+  "Higiena Jamy Ustnej": [
+    "Pasta do zębów", "Szczoteczki do zębów", "Nić dentystyczna", "Płyn do płukania jamy ustnej"
+  ],
+  "Twarz i Pielęgnacja Ciała": [
+    "Żel do mycia twarzy", "Płyn micelarny", "Płatki kosmetyczne", "Patyczki higieniczne",
+    "Chusteczki higieniczne", "Krem do twarzy", "Krem do rąk", "Balsam do ciała",
+    "Pomadka ochronna", "Pianka do golenia", "Maszynki jednorazowe", "Balsam po goleniu",
+    "Antyperspirant", "Perfumy"
+  ],
+  "Apteczka – Maści i Pielęgnacja Skóry": [
+    "Maść z witaminą A", "Maść cynkowa", "Maść z antybiotykiem (np. Tribiotic)",
+    "Maść łagodząca (np. Bepanthen / Alantan)", "Żel przeciwbólowy (np. Voltaren)",
+    "Maść rozgrzewająca", "Żel chłodzący na stłuczenia (Altacet)",
+    "Żel na ukąszenia owadów (Fenistil)", "Żel aloesowy"
+  ],
+  "Apteczka – Opatrunki i Dezynfekcja": [
+    "Plastry z opatrunkiem", "Plastry na pęcherze", "Bandaż elastyczny",
+    "Gaziki jałowe", "Przylepiec w rolce", "Płyn do dezynfekcji ran (np. Octenisept)"
+  ],
+  "Apteczka – Leki i Suplementy": [
+    "Tabletki przeciwbólowe (Paracetamol)", "Tabletki przeciwzapalne (Ibuprofen)",
+    "Tabletki rozkurczowe na okres i brzuch (No-Spa)", "Tabletki na gardło",
+    "Krople do nosa", "Woda morska do nosa", "Saszetki na przeziębienie",
+    "Węgiel aktywny", "Tabletki na biegunkę", "Elektrolity",
+    "Tabletki na zgagę", "Witaminy (D3, C, Magnez)"
+  ],
+  "Drobiazgi do Domu": [
+    "Baterie AA", "Baterie AAA", "Zapalniczka", "Taśma klejąca",
+    "Taśma naprawcza (duct tape)", "Klej szybkoschnący (Kropelka)"
   ]
 };
 
@@ -711,7 +782,7 @@ function manageDachshunds() {
         const size = 28 + (i % 3) * 6;
         el.style.cssText = `position:absolute; left:0; top:0; font-size:${size}px; line-height:1; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.08)); opacity:0.82; will-change:transform;`;
         layer.appendChild(el);
-        const speed = 0.45 + Math.random() * 0.35; // powolne tempo
+        const speed = 0.45 + Math.random() * 0.35;
         const angle = (Math.PI / 4) + (i * Math.PI / 2) + (Math.random() * 0.3);
         bouncingDogs.push({
           el,
@@ -735,7 +806,6 @@ function manageDachshunds() {
           else if (d.x >= maxW) { d.x = Math.max(0, maxW); d.vx = -Math.abs(d.vx); }
           if (d.y <= 0) { d.y = 0; d.vy = Math.abs(d.vy); }
           else if (d.y >= maxH) { d.y = Math.max(0, maxH); d.vy = -Math.abs(d.vy); }
-          // Emoji 🐕 domyślnie patrzy w lewo, więc przy ruchu w prawo odbijamy lustrzanie (scaleX(-1))
           const flip = d.vx > 0 ? -1 : 1;
           d.el.style.transform = `translate3d(${d.x.toFixed(1)}px, ${d.y.toFixed(1)}px, 0) scaleX(${flip})`;
         }
@@ -924,7 +994,7 @@ async function deleteCategory(type) {
 }
 
 async function renameCategory(type) {
-  const selectEl = type === 'dish' ? $('editDishCatSelect') :$('editIngDbCatSelect');
+  const selectEl = type === 'dish' ? $('editDishCatSelect') : $('editIngDbCatSelect');
   const oldCat = selectEl.value;
   if (!oldCat) return toast('Wybierz najpierw kategorię z listy, aby zmienić jej nazwę');
 
@@ -1094,13 +1164,35 @@ onSnapshot(collection(db, "ingredients_catalog"), snap => {
   loaded.ingredients = true;
   renderIngredientsBaza();
   updateCategorySelects();
+  renderShopSuggestions();
 }, err => { console.error(err); toast('Brak dostępu do bazy składników'); });
+
+function getMissingDefaultIngredients() {
+  const existingNames = new Set(ingredientsCatalog.map(i => norm(i.name)));
+  const toAdd = [];
+  for (const [category, names] of Object.entries(DEFAULT_INGREDIENTS_CATALOG)) {
+    for (const name of names) {
+      if (!existingNames.has(norm(name))) {
+        existingNames.add(norm(name));
+        toAdd.push({ name, category });
+      }
+    }
+  }
+  return toAdd;
+}
 
 function renderIngredientsBaza() {
   const container = $('ing-baza-list-container');
   if (!loaded.ingredients) { container.innerHTML = '<div class="skeleton sm"></div><div class="skeleton sm"></div>'; return; }
 
-  $('btn-seed-ing-db').style.display = ingredientsCatalog.length < 20 ? 'flex' : 'none';
+  const missingDefaults = getMissingDefaultIngredients();
+  const seedBtn = $('btn-seed-ing-db');
+  if (missingDefaults.length > 0) {
+    seedBtn.style.display = 'flex';
+    seedBtn.textContent = `🤖 Załaduj brakujące składniki i produkty do bazy (${missingDefaults.length})`;
+  } else {
+    seedBtn.style.display = 'none';
+  }
 
   const cats = [...new Set(ingredientsCatalog.map(i => i.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pl'));
   if (activeIngCat && !cats.includes(activeIngCat)) activeIngCat = '';
@@ -1112,7 +1204,7 @@ function renderIngredientsBaza() {
   const list = ingredientsCatalog.filter(i => norm(i.name).includes(q) && (!activeIngCat || i.category === activeIngCat));
 
   if (ingredientsCatalog.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="big">🥕</div><div class="t">Baza składników jest pusta</div><div class="s">Kliknij pomarańczowy przycisk powyżej, aby załadować gotową listę 220+ składników, lub dodaj własny przyciskiem +</div></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="big">🥕</div><div class="t">Baza składników jest pusta</div><div class="s">Kliknij pomarańczowy przycisk powyżej, aby załadować gotową listę składników i artykułów domowych, lub dodaj własny przyciskiem +</div></div>`;
     return;
   }
   if (list.length === 0) {
@@ -1135,27 +1227,22 @@ function renderIngredientsBaza() {
 }
 
 async function seedDefaultIngredients() {
-  const existingNames = new Set(ingredientsCatalog.map(i => norm(i.name)));
-  const toAdd = [];
-  for (const [category, names] of Object.entries(DEFAULT_INGREDIENTS_CATALOG)) {
-    for (const name of names) {
-      if (!existingNames.has(norm(name))) {
-        existingNames.add(norm(name));
-        toAdd.push({ name, category });
-      }
-    }
-  }
+  const toAdd = getMissingDefaultIngredients();
   if (!toAdd.length) {
     toast('Wszystkie domyślne składniki są już w bazie!');
     $('btn-seed-ing-db').style.display = 'none';
     return;
   }
-  const batch = writeBatch(db);
-  toAdd.forEach(item => {
-    batch.set(doc(collection(db, "ingredients_catalog")), item);
-  });
-  await safe(batch.commit());
-  toast(`Załadowano ${toAdd.length} składników do bazy!`);
+  // Firestore writeBatch obsługuje do 500 operacji naraz – dzielimy bezpiecznie na paczki po 400
+  for (let i = 0; i < toAdd.length; i += 400) {
+    const chunk = toAdd.slice(i, i + 400);
+    const batch = writeBatch(db);
+    chunk.forEach(item => {
+      batch.set(doc(collection(db, "ingredients_catalog")), item);
+    });
+    await safe(batch.commit());
+  }
+  toast(`Załadowano ${toAdd.length} nowych pozycji do bazy!`);
 }
 
 function openIngDbEditor(id = null) {
@@ -1163,7 +1250,8 @@ function openIngDbEditor(id = null) {
   $('ingDbModalTitle').textContent = item ? 'Edytuj składnik' : 'Nowy składnik';
   $('editIngDbId').value = item ? item.id : '';
   $('editIngDbName').value = item ? (item.name || '') : '';
-  $('editIngDbCatNew').style.display = 'none';$('editIngDbCatNew').value = '';
+  $('editIngDbCatNew').style.display = 'none';
+  $('editIngDbCatNew').value = '';
   updateCategorySelects(null, item ? (item.category || '') : (activeIngCat || ''));
   openModal('ingDbModal');
 }
@@ -1456,14 +1544,78 @@ function selectDishForPlan(id) {
   safe(setDoc(doc(db, "plans", currentUser), updates, { merge:true }));
 }
 
-/* ---------- Zakupy ---------- */
+/* ---------- Zakupy i Podpowiedzi z Bazy ---------- */
 onSnapshot(collection(db, "shopping"), snap => {
   shoppingItems = [];
   snap.forEach(d => shoppingItems.push({ id:d.id, ...d.data() }));
   shoppingItems.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   loaded.shop = true;
   renderShopping();
+  renderShopSuggestions();
 }, err => { console.error(err); toast('Brak dostępu do listy zakupów'); });
+
+function getFullSuggestionsPool() {
+  const map = new Map();
+  // Najpierw baza z Firebase
+  ingredientsCatalog.forEach(i => {
+    const k = norm(i.name);
+    if (k && !map.has(k)) map.set(k, { name: i.name, category: i.category || '' });
+  });
+  // Uzupełnienie domyślnym katalogiem (gdyby jeszcze nie był załadowany do Firebase)
+  for (const [category, names] of Object.entries(DEFAULT_INGREDIENTS_CATALOG)) {
+    for (const name of names) {
+      const k = norm(name);
+      if (k && !map.has(k)) map.set(k, { name, category });
+    }
+  }
+  return [...map.values()];
+}
+
+function renderShopSuggestions() {
+  const box = $('shopSuggestions');
+  const input = $('newShopInput');
+  if (!box || !input) return;
+
+  const q = norm(input.value);
+  if (!q) {
+    box.classList.remove('open');
+    box.innerHTML = '';
+    return;
+  }
+
+  const onList = new Set(shoppingItems.filter(i => !i.checked).map(i => norm(i.name)));
+  const pool = getFullSuggestionsPool();
+
+  // Dopasowanie: najpierw zaczynające się od wpisanej frazy, potem zawierające ją w środku
+  const starts = [];
+  const contains = [];
+  for (const item of pool) {
+    const n = norm(item.name);
+    if (onList.has(n)) continue;
+    if (n.startsWith(q)) starts.push(item);
+    else if (n.includes(q)) contains.push(item);
+  }
+  const matches = [...starts, ...contains].slice(0, 6);
+
+  if (!matches.length) {
+    box.classList.remove('open');
+    box.innerHTML = '';
+    return;
+  }
+
+  box.innerHTML =
+    `<div class="shop-sug-head">Podpowiedzi z bazy składników (lub wpisz własny i kliknij Dodaj)</div>` +
+    matches.map(m => `
+      <div class="shop-sug-item">
+        <button type="button" class="shop-sug-main" data-act="fill-shop-sug" data-name="${esc(m.name)}" title="Wstaw do pola">
+          <div class="shop-sug-name">${esc(m.name)}</div>
+          ${m.category ? `<div class="shop-sug-cat">${esc(m.category)}</div>` : ''}
+        </button>
+        <button type="button" class="shop-sug-add" data-act="add-shop-sug" data-name="${esc(m.name)}" title="Od razu dodaj do listy">+ Dodaj</button>
+      </div>
+    `).join('');
+  box.classList.add('open');
+}
 
 function shopItemHTML(item) {
   return `
@@ -1481,7 +1633,7 @@ function getItemCategory(name) {
   // 1. Dokładne dopasowanie w bazie Firebase
   const exact = ingredientsCatalog.find(i => norm(i.name) === n);
   if (exact && exact.category) return exact.category;
-  // 2. Dokładne lub częściowe dopasowanie w domyślnym katalogu 220+ składników
+  // 2. Dokładne lub częściowe dopasowanie w domyślnym katalogu
   for (const [cat, items] of Object.entries(DEFAULT_INGREDIENTS_CATALOG)) {
     if (items.some(item => norm(item) === n || norm(item).startsWith(n + ' ') || norm(item).includes(n))) {
       return cat;
@@ -1568,15 +1720,18 @@ document.addEventListener('focusout', e => {
   }
 });
 
-function addShopItem() {
+function addShopItem(customName = null) {
   const nameInput = $('newShopInput'), amountInput =$('newShopAmount');
-  const name = nameInput.value.trim(), amount = amountInput.value.trim();
+  const name = (customName !== null ? customName : nameInput.value).trim();
+  const amount = amountInput.value.trim();
   if (!name) return;
   if (shoppingItems.some(i => !i.checked && norm(i.name) === norm(name))) {
     toast(`„${name}" już jest na liście`);
     return;
   }
-  nameInput.value = ''; amountInput.value = '';
+  nameInput.value = '';
+  amountInput.value = '';
+  renderShopSuggestions();
   nameInput.focus();
   safe(addDoc(collection(db, "shopping"), { name, amount, checked:false, createdAt:Date.now() }));
 }
@@ -1674,6 +1829,12 @@ const actions = {
     updateCookProgress();
   },
   'add-shop': () => addShopItem(),
+  'fill-shop-sug': el => {
+    const inp = $('newShopInput');
+    inp.value = el.dataset.name;
+    $('shopSuggestions').classList.remove('open');$('newShopAmount').focus();
+  },
+  'add-shop-sug': el => addShopItem(el.dataset.name),
   'del-shop': el => deleteShopItem(el.dataset.id),
   'toggle-done': () => { showDone = !showDone; renderShopping(); },
   'clear-purchased': () => clearPurchased(),
@@ -1739,7 +1900,11 @@ document.addEventListener('change', e => {
   }
 });
 
-$('newShopInput').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });$('newShopAmount').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });
+$('newShopInput').addEventListener('input', renderShopSuggestions);$('newShopInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addShopItem();
+  if (e.key === 'Escape') $('shopSuggestions').classList.remove('open');
+});
+$('newShopAmount').addEventListener('keydown', e => { if (e.key === 'Enter') addShopItem(); });
 $('bazaSearch').addEventListener('input', renderBaza);$('ingBazaSearch').addEventListener('input', renderIngredientsBaza);
 $('modalSearch').addEventListener('input', filterModalDishes);$('dishIngQuickSearch').addEventListener('input', renderDishQuickIngChips);
 
