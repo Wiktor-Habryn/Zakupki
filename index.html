@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -171,7 +171,7 @@ textarea.input-styled { resize:none; height:130px; line-height:1.4; }
 
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; justify-content:center; align-items:flex-end; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }
 .modal.open { display:flex; }
-.sheet { background:var(--bg); width:100%; max-width:600px; border-radius:24px 24px 0 0; display:flex; flex-direction:column; max-height:90vh; max-height:90dvh; animation:slideUp .35s cubic-bezier(.1,.9,.2,1); }
+.sheet { background:var(--bg); width:100%; max-width:600px; border-radius:24px 24px 0 0; display:flex; flex-direction:column; max-height:calc(90dvh - var(--keyboard-offset, 0px)); margin-bottom:var(--keyboard-offset, 0px); animation:slideUp .35s cubic-bezier(.1,.9,.2,1); transition:margin-bottom .15s ease-out, max-height .15s ease-out; }
 @keyframes slideUp { from { transform:translateY(100%); } to { transform:none; } }
 .sheet-header { padding:8px 20px 14px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); background:var(--surface); border-radius:24px 24px 0 0; touch-action:none; }
 .sheet-handle { width:100%; display:flex; justify-content:center; padding:4px 0 10px; }
@@ -831,40 +831,36 @@ function toast(msg, action) {
   toastTimer = setTimeout(() => t.classList.remove('show'), action ? 5000 : 2200);
 }
 
-/* ---------- Modale ---------- */
-function openModal(id) { $(id).classList.add('open'); }
-function closeModal(id) { $(id).classList.remove('open'); }
+/* ---------- Modale & Klawiatura mobilna ---------- */
+function updateModalKeyboardOffset() {
+  if (!window.visualViewport) return;
+  const offset = Math.max(0, window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop);
+  document.documentElement.style.setProperty('--keyboard-offset', `${offset}px`);
+  
+  const activeModal = document.querySelector('.modal.open .sheet-body');
+  if (activeModal && offset > 0) {
+    activeModal.scrollTop = 0;
+  }
+}
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateModalKeyboardOffset);
+  window.visualViewport.addEventListener('scroll', updateModalKeyboardOffset);
+}
+
+function openModal(id) {
+  $(id).classList.add('open');
+  updateModalKeyboardOffset();
+}
+
+function closeModal(id) {
+  $(id).classList.remove('open');
+  document.documentElement.style.setProperty('--keyboard-offset', '0px');
+}
 
 document.querySelectorAll('.modal').forEach(m => {
   m.addEventListener('pointerdown', e => { if (e.target === m) closeModal(m.id); });
 });
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    if (cookingOpen) return closeCooking();
-    document.querySelectorAll('.modal.open').forEach(m => closeModal(m.id));
-  }
-});
-
-document.querySelectorAll('.sheet').forEach(sheet => {
-  const header = sheet.querySelector('.sheet-header');
-  const modal = sheet.parentElement;
-  let startY = null, dy = 0;
-  header.addEventListener('touchstart', e => { startY = e.touches[0].clientY; dy = 0; sheet.style.animation = 'none'; }, { passive:true });
-  header.addEventListener('touchmove', e => {
-    if (startY === null) return;
-    dy = Math.max(0, e.touches[0].clientY - startY);
-    sheet.style.transform = `translateY(${dy}px)`;
-  }, { passive:true });
-  header.addEventListener('touchend', () => {
-    if (startY === null) return;
-    sheet.style.transition = 'transform .2s';
-    if (dy > 90) closeModal(modal.id);
-    sheet.style.transform = '';
-    setTimeout(() => { sheet.style.transition = ''; sheet.style.animation = ''; }, 220);
-    startY = null;
-  });
-});
-
 /* ---------- Nawigacja ---------- */
 function switchTab(tab) {
   currentTab = tab;
